@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+.vercel
+.claude/
+*.log
+
+# Local env / secrets (never commit)
+.env
+.env.*

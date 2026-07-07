@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>SBI Reconciliation Tool — Evolution & Portfolio Piece</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --brand: #1d4ed8;
+      --brand-weak: #e8efff;
+      --success: #059669;
+      --warning: #d97706;
+      --error: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 28px;
+    }
+    h1 { margin: 0; font-size: 26px; }
+    h2 { margin: 0 0 8px 0; font-size: 20px; }
+    h3 { margin: 0 0 8px 0; font-size: 16px; }
+    p { margin: 0; }
+
+    /* ===== Navigation & Intro Section ===== */
+    .intro-section {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 28px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      color: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+    .intro-section h1 { color: white; margin-bottom: 8px; }
+    .intro-section p { color: rgba(255,255,255,0.9); line-height: 1.6; margin-bottom: 16px; }
+    .version-tabs {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .version-tab-btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .version-tab-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .version-tab-btn.active {
+      background: white;
+      color: #1d4ed8;
+    }
+
+    /* ===== Version Containers ===== */
+    .version-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: none;
+    }
+    .version-container.active {
+      display: block;
+    }
+    .version-header {
+      padding: 20px 28px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .version-label {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+    .version-label.v1 { background: #fef3c7; color: #92400e; }
+    .version-label.v2 { background: #dcfce7; color: #166534; }
+    .version-notes {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* ===== V1 (Minimal) Style ===== */
+    .v1-shell {
+      padding: 16px;
+    }
+    .v1-section {
+      margin: 20px 0;
+    }
+    .v1-section h2 {
+      margin: 0 0 12px 0;
+    }
+    .v1-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+    .v1-row {
+      margin: 6px 0;
+    }
+    .v1-btn {
+      padding: 8px 12px;
+      border: 1px solid #444;
+      border-radius: 6px;
+      background: #fafafa;
+      cursor: pointer;
+    }
+    .v1-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .v1-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eef;
+      margin-right: 6px;
+      font-size: 12px;
+    }
+    .v1-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    .v1-table th, .v1-table td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: left;
+    }
+    .v1-table th {
+      background: #f2f2f2;
+    }
+    .v1-pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background: #f6f8fa;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    /* ===== V2 (Polished) Style ===== */
+    .v2-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .app-kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .page {
+      display: grid;
+      gap: 20px;
+    }
+    .section {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff, #f9fbff);
+      box-shadow: var(--shadow);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0;
+      background: var(--card);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    }
+    .row { margin: 10px 0; }
+    .row.inline {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .hint { color: var(--muted); font-size: 12px; }
+    label { font-weight: 600; }
+    input[type="file"] {
+      padding: 10px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: #f8fafc;
+      width: 100%;
+    }
+    input[type="file"]:focus-visible,
+    button:focus-visible,
+    summary:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 2px;
+    }
+    .btn {
+      padding: 10px 16px;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      background: #f8fafc;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.05s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .btn:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14); }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary {
+      border-color: var(--brand);
+      background: var(--brand);
+      color: #ffffff;
+    }
+    .btn-secondary {
+      border-color: #cbd5f5;
+      background: #eef2ff;
+      color: #1e3a8a;
+    }
+    .btn-ghost {
+      border-color: var(--border);
+      background: transparent;
+      color: var(--text);
+    }
+    .btn-small {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 10px;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #374151;
+      font-weight: 600;
+      font-size: 12px;
+      min-height: 28px;
+    }
+    .status-pill[data-state="loading"] { background: #fef3c7; color: #92400e; }
+    .status-pill[data-state="success"] { background: #dcfce7; color: #166534; }
+    .status-pill[data-state="error"] { background: #fee2e2; color: #991b1b; }
+    .status-pill[data-state="ready"] { background: #e0e7ff; color: #1e40af; }
+    .upload-grid {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.3fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .file-meta {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .validation-hint { font-size: 12px; color: var(--muted); }
+    .validation-hint.error { color: var(--error); font-weight: 600; }
+    .file-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+    }
+    .file-name { font-weight: 600; font-size: 13px; }
+    .file-size { font-size: 12px; color: var(--muted); }
+    .section-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin-top: 10px;
+    }
+    .summary-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+    .summary-card.success { border-color: #bbf7d0; background: #ecfdf5; }
+    .summary-card.warn { border-color: #fed7aa; background: #fff7ed; }
+    .summary-label { font-size: 12px; color: var(--muted); }
+    .summary-value { font-size: 20px; font-weight: 700; margin-top: 4px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+    th { background: #f3f6ff; }
+    details { margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 600; }
+    details[open] summary { color: var(--brand); }
+    ul { margin: 6px 0 0 18px; color: var(--muted); }
+    .empty-state {
+      padding: 12px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .log-panel { position: relative; }
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .log-alert {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #fecaca;
+      background: #fee2e2;
+      color: #991b1b;
+      margin-bottom: 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .log-alert.warning {
+      border-color: #fde68a;
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .log-alert.hidden { display: none; }
+    .log-list {
+      background: #0b1220;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #111827;
+      max-height: 260px;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+    .log-item {
+      display: grid;
+      grid-template-columns: 130px 64px 140px 1fr;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-level { text-transform: uppercase; font-weight: 700; }
+    .log-item.log-error .log-level { color: #f87171; }
+    .log-item.log-warning .log-level { color: #fbbf24; }
+    .log-item.log-info .log-level { color: #60a5fa; }
+    .log-source { color: #a5b4fc; }
+
+    @media (max-width: 900px) {
+      body { padding: 20px; }
+      .intro-section { padding: 20px; }
+      .upload-grid { grid-template-columns: 1fr; }
+      .log-item { grid-template-columns: 110px 60px 110px 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== INTRO SECTION ===== -->
+<div class="intro-section">
+  <h1>SBI Reconciliation Tool</h1>
+  <p><strong>A case study in thinking:</strong> Building utility first, then polishing with user experience.</p>
+  <p>Below you'll see <strong>Version 1 (V1)</strong> — the bare-bones, functional implementation. Then <strong>Version 2 (V2)</strong> — the evolved frontend that prioritizes user feedback, data visibility, and professional polish.</p>
+
+  <div class="version-tabs">
+    <button class="version-tab-btn active" onclick="switchVersion('v1')">Version 1: Utility First</button>
+    <button class="version-tab-btn" onclick="switchVersion('v2')">Version 2: UX Polish</button>
+  </div>
+</div>
+
+<!-- ===== VERSION 1: MINIMAL / UTILITY FIRST ===== -->
+<div id="v1" class="version-container active">
+  <div class="version-header">
+    <span class="version-label v1">Version 1</span>
+    <h2>The Original Implementation (Utility First)</h2>
+    <div class="version-notes">
+      <strong>Philosophy:</strong> Prove the concept works. Focus on the core business logic: CSV combining and reconciliation.
+      <br><br>
+      <strong>What's here:</strong> Pyodide-based Python execution, file upload, reconciliation logic, downloadable results.
+      <br>
+      <strong>What's missing:</strong> File size feedback, validation messages, visual hierarchy, status tracking, professional design.
+      <br><br>
+      <strong>Goal achieved:</strong> Demonstrates that the idea solves the problem. Ready for internal use, but raw.
+    </div>
+  </div>
+
+  <div class="v1-shell">
+    <!-- Combining CSV Code starts here -->
+    <div class="v1-section">
+      <h2>Upload multiple CSVs and combine them</h2>
+      <input type="file" id="v1-csvFiles" multiple accept=".csv"><br><br>
+      <button class="v1-btn" id="v1-combineBtn">Combine & Download</button>
+    </div>
+    <script>
+      async function v1_main() {
+        const pyodide = await loadPyodide();
+        document.getElementById("v1-combineBtn").onclick = async () => {
+          const input = document.getElementById("v1-csvFiles");
+          if (!input.files.length) {
+            alert("Please upload at least one CSV file.");
+            return;
+          }
+          for (let f of input.files) {
+            let data = await f.text();
+            pyodide.FS.writeFile(f.name, data);
+          }
+          const pythonCode = `
+import os, csv
+combined_rows = []
+for filename in os.listdir('.'):
+    if filename.endswith('.csv'):
+        with open(filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                combined_rows.append(row)
+output_file = "combined_output.csv"
+with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
+    writer = csv.writer(out_file)
+    writer.writerows(combined_rows)
+          `;
+          await pyodide.runPythonAsync(pythonCode);
+          let combined = pyodide.FS.readFile("combined_output.csv", { encoding: "utf8" });
+          let blob = new Blob([combined], { type: "text/csv" });
+          let url = URL.createObjectURL(blob);
+          let a = document.createElement("a");
+          a.href = url;
+          a.download = "combined_output.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+      }
+      v1_main();
+    </script>
+    <!-- Combining CSV Code ends here -->
+    <br><br><br>
+    <!-- Recon Code starts here -->
+    <div class="v1-section">
+      <h2>Reconciliation Tool</h2>
+      <div class="v1-card">
+        <div class="v1-row">
+          <label>Upload two CSVs (fixed formats)</label>
+        </div>
+        <div class="v1-row">
+          <input type="file" id="v1-csvFilesForRecon" multiple accept=".csv" />
+        </div>
+        <div class="v1-row">
+          <button class="v1-btn" id="v1-runBtn">Run Reconciliation</button>
+          <span id="v1-status" class="v1-pill">Idle</span>
+        </div>
+      </div>
+
+      <div class="v1-card">
+        <h3>Aggregated Summary</h3>
+        <div id="v1-summary"></div>
+        <details>
+          <summary>Matching Unique Keys (sample rows)</summary>
+          <div id="v1-matchingSample"></div>
+        </details>
+        <details>
+          <summary>Date Mismatch (sample rows)</summary>
+          <div id="v1-dateMismatchSample"></div>
+        </details>
+        <details>
+          <summary>Quantity Mismatch (sample rows)</summary>
+          <div id="v1-qtyMismatchSample"></div>
+        </details>
+        <details>
+          <summary>Turnover Mismatch (sample rows)</summary>
+          <div id="v1-turnoverMismatchSample"></div>
+        </details>
+        <details>
+          <summary>Missing in Smallcase (sample rows)</summary>
+          <div id="v1-missSmallcaseSample"></div>
+        </details>
+        <details>
+          <summary>Missing in SSL (sample rows)</summary>
+          <div id="v1-missSSLSample"></div>
+        </details>
+      </div>
+
+      <div class="v1-card">
+        <h3>Downloads</h3>
+        <div class="v1-row">Use this to download all output sheets as CSV inside one ZIP.</div>
+        <div class="v1-row">
+          <button class="v1-btn" id="v1-downloadZipBtn" disabled>Download Results ZIP</button>
+        </div>
+        <div class="v1-row">
+          The ZIP includes:
+          <ul>
+            <li>MatchingUniqueKeysSummary.csv</li>
+            <li>Missing in smallcase.csv</li>
+            <li>Missing in SSL.csv</li>
+            <li>Date Mismatch.csv</li>
+            <li>Quantity Mismatch.csv</li>
+            <li>Turnover Mismatch.csv</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="v1-card">
+        <h3>Logs</h3>
+        <pre id="v1-output" class="v1-pre">Load two CSV files and click Run Reconciliation.</pre>
+      </div>
+    </div>
+
+    <script>
+      async function v1_loadPy() {
+        const pyodide = await loadPyodide();
+        await pyodide.loadPackage(["pandas"]);
+        return pyodide;
+      }
+
+      function v1_toHtmlTableFromCSV(csvText, maxRows = 20) {
+        const lines = csvText.trim().split(/\r?\n/);
+        if (lines.length === 0) return "<em>No data</em>";
+        const headers = lines[0].split(",");
+        const rows = lines.slice(1, 1 + maxRows).map(r => r.split(","));
+        let html = "<table class='v1-table'><thead><tr>";
+        headers.forEach(h => html += `<th>${h}</th>`);
+        html += "</tr></thead><tbody>";
+        rows.forEach(r => {
+          html += "<tr>";
+          headers.forEach((_, i) => html += `<td>${(r[i] ?? "").replaceAll("<","&lt;")}</td>`);
+          html += "</tr>";
+        });
+        html += "</tbody></table>";
+        return html;
+      }
+
+      function v1_setStatus(text) {
+        document.getElementById("v1-status").textContent = text;
+      }
+
+      function v1_log(text) {
+        const out = document.getElementById("v1-output");
+        out.textContent += "\n" + text;
+      }
+
+      let v1_pyReadyPromise = v1_loadPy();
+
+      document.getElementById("v1-runBtn").onclick = async () => {
+        v1_setStatus("Initializing...");
+        const pyodide = await v1_pyReadyPromise;
+
+        const input = document.getElementById("v1-csvFilesForRecon");
+        if (!input.files || input.files.length !== 2) {
+          alert("Please upload exactly 2 CSV files.");
+          v1_setStatus("Idle");
+          return;
+        }
+
+        v1_setStatus("Loading files...");
+        const fileNames = [];
+        for (let f of input.files) {
+          const data = await f.text();
+          const safeName = f.name.replaceAll(" ", "_");
+          pyodide.FS.writeFile(safeName, data);
+          fileNames.push(safeName);
+        }
+
+        const pythonCode = `
+import pandas as pd, io, zipfile
+import os
+files = ${JSON.stringify([])}
+`;
+        await pyodide.runPythonAsync(`files = ${JSON.stringify(fileNames)}`);
+
+        const coreCode = `
+import pandas as pd, io, zipfile, json
+
+df1 = pd.read_csv(files[0])
+df2 = pd.read_csv(files[1])
+
+df1UniqueKey = (
+    df1.iloc[:, 2].astype(str).str.strip() + "_" +
+    df1.iloc[:, 8].astype(str).str.strip() + "_" +
+    df1.iloc[:, 3].astype(str).str.strip()
+)
+
+if {"Broker ID","tag","orderId"}.issubset(df2.columns):
+    order_clean = df2["orderId"].astype(str).str.lstrip("_").str.strip()
+    df2UniqueKey = (
+        df2["Broker ID"].astype(str).str.strip() + "_" +
+        df2["tag"].astype(str).str.strip() + "_" +
+        order_clean
+    )
+else:
+    order_clean = df2.iloc[:,19].astype(str).str.lstrip("_").str.strip()
+    df2UniqueKey = (
+        df2.iloc[:,1].astype(str).str.strip() + "_" +
+        df2.iloc[:,24].astype(str).str.strip() + "_" +
+        order_clean
+    )
+
+keys1 = set(df1UniqueKey)
+keys2 = set(df2UniqueKey)
+matchingkeys = keys1 & keys2
+file1onlykeys = keys1 - keys2
+file2onlykeys = keys2 - keys1
+
+df1matched = df1[df1UniqueKey.isin(matchingkeys)].copy()
+df2matched = df2[df2UniqueKey.isin(matchingkeys)].copy()
+df1matched.index = df1UniqueKey[df1UniqueKey.isin(matchingkeys)]
+df2matched.index = df2UniqueKey[df2UniqueKey.isin(matchingkeys)]
+
+commonindex = df1matched.index.intersection(df2matched.index)
+
+if "stock order date" in df2.columns:
+    datesfile2 = pd.to_datetime(df2matched["stock order date"].astype(str).str.replace(" UTC","", regex=False), errors="coerce").dt.date
+else:
+    datesfile2 = pd.to_datetime(df2matched.iloc[:,13], errors="coerce", utc=True).dt.date
+datesfile1 = pd.to_datetime(df1matched.iloc[:,6], format="%d-%b-%y", errors="coerce").dt.date
+
+if "quantity" in df2.columns:
+    quantitiesfile2 = pd.to_numeric(df2matched["quantity"], errors="coerce")
+else:
+    quantitiesfile2 = pd.to_numeric(df2matched.iloc[:,16], errors="coerce")
+quantitiesfile1 = pd.to_numeric(df1matched.iloc[:,7], errors="coerce")
+
+pricefile1 = pd.to_numeric(df1matched.iloc[:,4], errors="coerce")
+
+if {"buyamount","sell price"}.issubset(df2.columns):
+    buyamount = pd.to_numeric(df2matched["buyamount"], errors="coerce")
+    sellprice = pd.to_numeric(df2matched["sell price"], errors="coerce")
+else:
+    buyamount = pd.to_numeric(df2matched.iloc[:,17], errors="coerce")
+    sellprice = pd.to_numeric(df2matched.iloc[:,18], errors="coerce")
+
+turnoverfile1 = quantitiesfile1 * pricefile1
+turnoverfile2 = buyamount.where(buyamount.notna(), sellprice)
+
+matchingsummarydf = pd.DataFrame({
+    "UniqueKey": list(commonindex),
+    "QuantityFile1": quantitiesfile1.loc[commonindex].values,
+    "QuantityFile2": quantitiesfile2.loc[commonindex].values,
+    "TurnoverFile1": turnoverfile1.loc[commonindex].round(2).values,
+    "TurnoverFile2": turnoverfile2.loc[commonindex].round(2).values,
+    "DateFile1": datesfile1.loc[commonindex].astype(str).values,
+    "DateFile2": datesfile2.loc[commonindex].astype(str).values,
+})
+
+datemismatchmask = (datesfile1.loc[commonindex].values != datesfile2.loc[commonindex].values)
+quantitymismatchmask = (quantitiesfile1.loc[commonindex].values != quantitiesfile2.loc[commonindex].values)
+turnovermismatchmask = (turnoverfile1.loc[commonindex].round(2).values != turnoverfile2.loc[commonindex].round(2).values)
+
+datemismatchdf = pd.DataFrame({
+    "UniqueKey": pd.Index(commonindex)[datemismatchmask].tolist(),
+    "DateFile1": pd.Series(datesfile1.loc[commonindex].values)[datemismatchmask].astype(str).values,
+    "DateFile2": pd.Series(datesfile2.loc[commonindex].values)[datemismatchmask].astype(str).values,
+})
+
+quantitymismatchdf = pd.DataFrame({
+    "UniqueKey": pd.Index(commonindex)[quantitymismatchmask].tolist(),
+    "QuantityFile1": pd.Series(quantitiesfile1.loc[commonindex].values)[quantitymismatchmask].values,
+    "QuantityFile2": pd.Series(quantitiesfile2.loc[commonindex].values)[quantitymismatchmask].values,
+})
+
+turnovermismatchdf = pd.DataFrame({
+    "UniqueKey": pd.Index(commonindex)[turnovermismatchmask].tolist(),
+    "TurnoverFile1": pd.Series(turnoverfile1.loc[commonindex].round(2).values)[turnovermismatchmask].values,
+    "TurnoverFile2": pd.Series(turnoverfile2.loc[commonindex].round(2).values)[turnovermismatchmask].values,
+})
+
+missinginsmallcase = df1[df1UniqueKey.isin(file1onlykeys)].copy()
+missinginssl = df2[df2UniqueKey.isin(file2onlykeys)].copy()
+
+internaluserids = [
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID
+]
+missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
+
+def df_to_csv_str(df):
+    return df.to_csv(index=False)
+
+outputs = {
+    "MatchingUniqueKeysSummary.csv": df_to_csv_str(matchingsummarydf),
+    "Missing in smallcase.csv": df_to_csv_str(missinginsmallcase),
+    "Missing in SSL.csv": df_to_csv_str(missinginssl),
+    "Date Mismatch.csv": df_to_csv_str(datemismatchdf),
+    "Quantity Mismatch.csv": df_to_csv_str(quantitymismatchdf),
+    "Turnover Mismatch.csv": df_to_csv_str(turnovermismatchdf),
+}
+
+summary_counts = {
+    "Matching Unique Keys": len(matchingsummarydf),
+    "Missing in Smallcase": len(missinginsmallcase),
+    "Missing in SSL": len(missinginssl),
+    "Date Mismatches": len(datemismatchdf),
+    "Quantity Mismatches": len(quantitymismatchdf),
+    "Turnover Mismatches": len(turnovermismatchdf),
+}
+
+result = {
+    "counts": summary_counts,
+    "samples": {
+        "MatchingUniqueKeysSummary.csv": outputs["MatchingUniqueKeysSummary.csv"].splitlines()[:21],
+        "Date Mismatch.csv": outputs["Date Mismatch.csv"].splitlines()[:21],
+        "Quantity Mismatch.csv": outputs["Quantity Mismatch.csv"].splitlines()[:21],
+        "Turnover Mismatch.csv": outputs["Turnover Mismatch.csv"].splitlines()[:21],
+        "Missing in smallcase.csv": outputs["Missing in smallcase.csv"].splitlines()[:21],
+        "Missing in SSL.csv": outputs["Missing in SSL.csv"].splitlines()[:21],
+    }
+}
+globals()["_outputs_csv_text"] = outputs
+json.dumps(result)
+`;
+
+        try {
+          v1_setStatus("Running reconciliation...");
+          const jsonText = await pyodide.runPythonAsync(coreCode);
+          v1_setStatus("Rendering summary...");
+          const res = JSON.parse(jsonText);
+
+          const s = res.counts;
+          document.getElementById("v1-summary").innerHTML = `
+            <div class="v1-row"><span class="v1-pill">Matching: ${s["Matching Unique Keys"]}</span>
+            <span class="v1-pill">Missing in Smallcase: ${s["Missing in Smallcase"]}</span>
+            <span class="v1-pill">Missing in SSL: ${s["Missing in SSL"]}</span>
+            <span class="v1-pill">Date mismatches: ${s["Date Mismatches"]}</span>
+            <span class="v1-pill">Qty mismatches: ${s["Quantity Mismatches"]}</span>
+            <span class="v1-pill">Turnover mismatches: ${s["Turnover Mismatches"]}</span></div>
+          `;
+
+          function linesToCSV(lines) { return lines.join("\n"); }
+
+          document.getElementById("v1-matchingSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["MatchingUniqueKeysSummary.csv"]));
+          document.getElementById("v1-dateMismatchSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Date Mismatch.csv"]));
+          document.getElementById("v1-qtyMismatchSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Quantity Mismatch.csv"]));
+          document.getElementById("v1-turnoverMismatchSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Turnover Mismatch.csv"]));
+          document.getElementById("v1-missSmallcaseSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Missing in smallcase.csv"]));
+          document.getElementById("v1-missSSLSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Missing in SSL.csv"]));
+
+          const zipBytesBase64 = await pyodide.runPythonAsync(`
+import io, zipfile, base64
+buf = io.BytesIO()
+with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    for name, text in _outputs_csv_text.items():
+        zf.writestr(name, text)
+b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+b64
+`);
+          const byteChars = atob(zipBytesBase64);
+          const byteNumbers = new Array(byteChars.length);
+          for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+          const zipBlob = new Blob([new Uint8Array(byteNumbers)], { type: "application/zip" });
+
+          const downloadBtn = document.getElementById("v1-downloadZipBtn");
+          downloadBtn.disabled = false;
+          downloadBtn.onclick = () => {
+            const url = URL.createObjectURL(zipBlob);
+            const b = document.createElement("a");
+            b.href = url;
+            b.download = "reconciliation_results.zip";
+            b.click();
+            URL.revokeObjectURL(url);
+          };
+
+          v1_log("Reconciliation completed.");
+          v1_setStatus("Done");
+        } catch (e) {
+          console.error(e);
+          v1_log("Error: " + (e.message || String(e)));
+          v1_setStatus("Error");
+        }
+      };
+    </script>
+    <!-- Recon Code ends here -->
+  </div>
+</div>
+
+<!-- ===== VERSION 2: POLISHED / UX ENHANCED ===== -->
+<div id="v2" class="version-container">
+  <div class="version-header">
+    <span class="version-label v2">Version 2</span>
+    <h2>The Evolved Implementation (UX Polish)</h2>
+    <div class="version-notes">
+      <strong>Philosophy:</strong> Same business logic, but designed for real users. Add visual feedback, file metadata, validation hints, status tracking, and professional polish.
+      <br><br>
+      <strong>What's new:</strong> File size display, clear validation messages, professional color system, status pills with loading states, organized layout with grid system, file list with remove buttons, structured logs, smooth interactions.
+      <br>
+      <strong>Key improvements:</strong> Users can see exactly what they're uploading, get clear feedback about what's needed, and track progress in real-time.
+      <br><br>
+      <strong>Goal achieved:</strong> Same functionality, but feels premium and trustworthy. Ready for external stakeholders.
+    </div>
+  </div>
+
+  <div class="v2-shell">
+    <header class="app-header">
+      <div>
+        <div class="app-kicker">SBI Reconciliation & Merge Tool</div>
+        <h1>Reconciliation & CSV Operations</h1>
+        <p class="subtitle">Combine multiple CSVs and/or reconcile two fixed-format files with clear, traceable outcomes.</p>
+      </div>
+      <div>
+        <span id="v2-globalStatus" class="status-pill" data-state="idle" aria-live="polite">Ready</span>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="section" id="v2-combineSection">
+        <div class="section-header">
+          <div>
+            <h2>Combine multiple CSVs</h2>
+            <p class="subtitle">Merge any number of CSV files into a single downloadable output.</p>
+          </div>
+          <span id="v2-combineStatus" class="status-pill" data-state="idle" aria-live="polite">Idle</span>
+        </div>
+
+        <div class="card">
+          <div class="upload-grid">
+            <div>
+              <label for="v2-csvFiles">Select CSV files</label>
+              <div class="row">
+                <input type="file" id="v2-csvFiles" multiple accept=".csv">
+              </div>
+              <div class="hint">Only CSV files are accepted. Large files may take longer to process.</div>
+            </div>
+            <div>
+              <div id="v2-combineMeta" class="file-meta">No files selected.</div>
+              <div id="v2-combineValidation" class="validation-hint">Add at least one CSV to enable combining.</div>
+              <div id="v2-combineFileList" class="file-list"></div>
+            </div>
+          </div>
+          <div class="row inline">
+            <button id="v2-combineBtn" class="btn btn-primary" disabled>Combine & Download</button>
+            <button id="v2-combineClearBtn" class="btn btn-ghost" type="button">Clear selection</button>
+            <span class="hint">Output: <strong>combined_output.csv</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="v2-reconSection">
+        <div class="section-header">
+          <div>
+            <h2>Reconciliation Tool</h2>
+            <p class="subtitle">Upload two fixed-format CSVs (Combined CS + Athena File) and run reconciliation.</p>
+          </div>
+          <span id="v2-status" class="status-pill" data-state="idle" aria-live="polite">Idle</span>
+        </div>
+
+        <div class="card">
+          <div class="upload-grid">
+            <div>
+              <label for="v2-csvFilesForRecon">Select two CSVs</label>
+              <div class="row">
+                <input type="file" id="v2-csvFilesForRecon" multiple accept=".csv" />
+              </div>
+              <div class="hint">The order of selecting the 2 files to upload matters. Select combined CSV first and then the Athena file.</div>
+            </div>
+            <div>
+              <div id="v2-reconMeta" class="file-meta">No files selected.</div>
+              <div id="v2-reconValidation" class="validation-hint">Add exactly two CSVs to enable reconciliation.</div>
+              <div id="v2-reconFileList" class="file-list"></div>
+            </div>
+          </div>
+          <div class="row inline">
+            <button class="btn btn-primary" id="v2-runBtn" disabled>Run Reconciliation</button>
+            <button class="btn btn-ghost" id="v2-reconClearBtn" type="button">Clear selection</button>
+            <span class="hint">For large files this can take several minutes.</span>
+          </div>
+        </div>
+
+        <div class="section-grid">
+          <div class="card">
+            <h3>Aggregated Summary</h3>
+            <div id="v2-summary" class="summary-grid"></div>
+            <div id="v2-summaryNotice" class="hint"></div>
+          </div>
+          <div class="card">
+            <h3>Downloads</h3>
+            <div class="row">Download all output sheets as CSV inside one ZIP (stand-in for XLSX).</div>
+            <div class="row inline">
+              <button class="btn btn-secondary" id="v2-downloadZipBtn" disabled>Download Results ZIP</button>
+              <span class="hint">The ZIP is available after reconciliation completes.</span>
+            </div>
+            <div class="row">
+              The ZIP includes:
+              <ul>
+                <li>MatchingUniqueKeysSummary.csv</li>
+                <li>Missing in smallcase.csv</li>
+                <li>Missing in SSL.csv</li>
+                <li>Date Mismatch.csv</li>
+                <li>Quantity Mismatch.csv</li>
+                <li>Turnover Mismatch.csv</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Reconciliation Results (samples)</h3>
+          <div class="hint">Showing up to 20 rows per category.</div>
+          <details>
+            <summary>Matching Unique Keys (sample rows)</summary>
+            <div id="v2-matchingSample"></div>
+          </details>
+          <details>
+            <summary>Date Mismatch (sample rows)</summary>
+            <div id="v2-dateMismatchSample"></div>
+          </details>
+          <details>
+            <summary>Quantity Mismatch (sample rows)</summary>
+            <div id="v2-qtyMismatchSample"></div>
+          </details>
+          <details>
+            <summary>Turnover Mismatch (sample rows)</summary>
+            <div id="v2-turnoverMismatchSample"></div>
+          </details>
+          <details>
+            <summary>Missing in Smallcase (sample rows)</summary>
+            <div id="v2-missSmallcaseSample"></div>
+          </details>
+          <details>
+            <summary>Missing in SSL (sample rows)</summary>
+            <div id="v2-missSSLSample"></div>
+          </details>
+        </div>
+
+        <div class="card log-panel">
+          <div class="log-header">
+            <h3>Logs</h3>
+            <button class="btn btn-ghost" id="v2-clearLogsBtn" type="button">Clear logs</button>
+          </div>
+          <div id="v2-logAlert" class="log-alert hidden" role="alert"></div>
+          <div id="v2-output" class="log-list" role="log" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // V2 UI/UX helpers
+    const v2_uiState = { combineBusy: false, reconBusy: false };
+
+    function v2_formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      const value = bytes / Math.pow(1024, i);
+      return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+    }
+
+    function v2_formatTimestamp(date = new Date()) {
+      return date.toLocaleString();
+    }
+
+    function v2_getLogElements() {
+      return {
+        container: document.getElementById("v2-output"),
+        alert: document.getElementById("v2-logAlert")
+      };
+    }
+
+    function v2_showLogAlert(message, level) {
+      const { alert } = v2_getLogElements();
+      if (!alert) return;
+      alert.textContent = message;
+      alert.classList.remove("hidden", "warning");
+      if (level === "warning") alert.classList.add("warning");
+    }
+
+    function v2_clearLogAlert() {
+      const { alert } = v2_getLogElements();
+      if (!alert) return;
+      alert.textContent = "";
+      alert.classList.add("hidden");
+      alert.classList.remove("warning");
+    }
+
+    function v2_logEvent({ message, level = "info", source = "system" }) {
+      try {
+        const { container } = v2_getLogElements();
+        if (!container) {
+          console[level === "error" ? "error" : "log"](`[${source}] ${message}`);
+          return;
+        }
+        const entry = document.createElement("div");
+        entry.className = `log-item log-${level}`;
+
+        const ts = document.createElement("span");
+        ts.className = "log-ts";
+        ts.textContent = v2_formatTimestamp();
+
+        const lvl = document.createElement("span");
+        lvl.className = "log-level";
+        lvl.textContent = level.toUpperCase();
+
+        const src = document.createElement("span");
+        src.className = "log-source";
+        src.textContent = source;
+
+        const msg = document.createElement("span");
+        msg.className = "log-message";
+        msg.textContent = message;
+
+        entry.append(ts, lvl, src, msg);
+        container.append(entry);
+        container.scrollTop = container.scrollHeight;
+
+        if (level === "error" || level === "warning") {
+          v2_showLogAlert(`${level.toUpperCase()}: ${message}`, level);
+        }
+      } catch (err) {
+        console.error("Logging failed:", err);
+      }
+    }
+
+    function v2_clearLogs() {
+      const { container } = v2_getLogElements();
+      if (container) container.innerHTML = "";
+      v2_clearLogAlert();
+    }
+
+    function v2_updateStatusPill(el, text, explicitState) {
+      if (!el) return;
+      el.textContent = text;
+      const lower = text.toLowerCase();
+      let state = explicitState || "idle";
+      if (lower.includes("initial") || lower.includes("loading") || lower.includes("running") || lower.includes("rendering") || lower.includes("combining")) {
+        state = "loading";
+      } else if (lower.includes("done") || lower.includes("completed")) {
+        state = "success";
+      } else if (lower.includes("error")) {
+        state = "error";
+      } else if (lower.includes("ready")) {
+        state = "ready";
+      }
+      el.dataset.state = state;
+    }
+
+    function v2_setGlobalStatus(text, state) {
+      v2_updateStatusPill(document.getElementById("v2-globalStatus"), text, state);
+    }
+
+    function v2_setStatus(text) {
+      v2_updateStatusPill(document.getElementById("v2-status"), text);
+    }
+
+    function v2_setCombineStatus(text) {
+      v2_updateStatusPill(document.getElementById("v2-combineStatus"), text);
+    }
+
+    function v2_setButtonEnabled(btn, enabled) {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.setAttribute("aria-disabled", String(!enabled));
+    }
+
+    function v2_initFileInput({
+      inputId, listId, metaId, validationId, clearBtnId, minCount, exactCount, sourceLabel, onValidityChange
+    }) {
+      const inputEl = document.getElementById(inputId);
+      const listEl = document.getElementById(listId);
+      const metaEl = document.getElementById(metaId);
+      const validationEl = document.getElementById(validationId);
+      const clearBtnEl = document.getElementById(clearBtnId);
+
+      if (!inputEl) return;
+
+      const update = () => {
+        const files = Array.from(inputEl.files || []);
+        const totalSize = files.reduce((sum, f) => sum + (f.size || 0), 0);
+
+        if (metaEl) {
+          metaEl.textContent = files.length
+            ? `${files.length} file(s) · ${v2_formatBytes(totalSize)}`
+            : "No files selected.";
+        }
+
+        if (listEl) {
+          listEl.innerHTML = "";
+          if (!files.length) {
+            const empty = document.createElement("div");
+            empty.className = "empty-state";
+            empty.textContent = "No files selected.";
+            listEl.append(empty);
+          } else {
+            files.forEach((file, index) => {
+              const item = document.createElement("div");
+              item.className = "file-item";
+
+              const left = document.createElement("div");
+              const name = document.createElement("div");
+              name.className = "file-name";
+              name.textContent = file.name;
+              const size = document.createElement("div");
+              size.className = "file-size";
+              size.textContent = v2_formatBytes(file.size || 0);
+              left.append(name, size);
+
+              const removeBtn = document.createElement("button");
+              removeBtn.type = "button";
+              removeBtn.className = "btn btn-ghost btn-small";
+              removeBtn.textContent = "Remove";
+              removeBtn.addEventListener("click", () => {
+                try {
+                  const dt = new DataTransfer();
+                  files.forEach((f, i) => {
+                    if (i !== index) dt.items.add(f);
+                  });
+                  inputEl.files = dt.files;
+                } catch (err) {
+                  inputEl.value = "";
+                }
+                update();
+                v2_logEvent({ message: `Removed ${file.name} from selection.`, level: "info", source: sourceLabel });
+              });
+
+              item.append(left, removeBtn);
+              listEl.append(item);
+            });
+          }
+        }
+
+        let valid = true;
+        let message = "";
+        if (Number.isFinite(exactCount)) {
+          valid = files.length === exactCount;
+          message = valid
+            ? "Ready to run with two files selected."
+            : `Select exactly ${exactCount} CSV files to continue.`;
+        } else if (Number.isFinite(minCount)) {
+          valid = files.length >= minCount;
+          message = valid
+            ? "Ready to combine."
+            : `Add at least ${minCount} CSV file(s) to continue.`;
+        }
+
+        if (validationEl) {
+          validationEl.textContent = message;
+          const showError = files.length > 0 && !valid;
+          validationEl.classList.toggle("error", showError);
+        }
+
+        if (onValidityChange) onValidityChange(valid, files.length);
+      };
+
+      inputEl.addEventListener("change", update);
+      if (clearBtnEl) {
+        clearBtnEl.addEventListener("click", () => {
+          inputEl.value = "";
+          update();
+          v2_logEvent({ message: "Selection cleared.", level: "info", source: sourceLabel });
+        });
+      }
+      update();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      v2_initFileInput({
+        inputId: "v2-csvFiles",
+        listId: "v2-combineFileList",
+        metaId: "v2-combineMeta",
+        validationId: "v2-combineValidation",
+        clearBtnId: "v2-combineClearBtn",
+        minCount: 1,
+        sourceLabel: "upload",
+        onValidityChange: (valid) => {
+          const combineBtn = document.getElementById("v2-combineBtn");
+          if (!v2_uiState.combineBusy) v2_setButtonEnabled(combineBtn, valid);
+          if (!v2_uiState.combineBusy) v2_setCombineStatus(valid ? "Ready" : "Idle");
+        }
+      });
+
+      v2_initFileInput({
+        inputId: "v2-csvFilesForRecon",
+        listId: "v2-reconFileList",
+        metaId: "v2-reconMeta",
+        validationId: "v2-reconValidation",
+        clearBtnId: "v2-reconClearBtn",
+        exactCount: 2,
+        sourceLabel: "upload",
+        onValidityChange: (valid) => {
+          const runBtn = document.getElementById("v2-runBtn");
+          if (!v2_uiState.reconBusy) v2_setButtonEnabled(runBtn, valid);
+          if (!v2_uiState.reconBusy) v2_setStatus(valid ? "Ready" : "Idle");
+        }
+      });
+
+      const clearLogsBtn = document.getElementById("v2-clearLogsBtn");
+      if (clearLogsBtn) {
+        clearLogsBtn.addEventListener("click", () => {
+          v2_clearLogs();
+          v2_logEvent({ message: "Logs cleared by user.", level: "info", source: "system" });
+        });
+      }
+
+      v2_setGlobalStatus("Ready", "idle");
+    });
+
+    // V2 Reconciliation logic
+    async function v2_loadPy() {
+      const pyodide = await loadPyodide();
+      await pyodide.loadPackage(["pandas"]);
+      return pyodide;
+    }
+
+    function v2_toHtmlTableFromCSV(csvText, maxRows = 20) {
+      if (!csvText || !csvText.trim()) {
+        return '<div class="empty-state">No data returned.</div>';
+      }
+      const lines = csvText.trim().split(/\r?\n/);
+      if (lines.length <= 1) {
+        return '<div class="empty-state">No rows to display.</div>';
+      }
+      const headers = lines[0].split(",");
+      const rows = lines.slice(1, 1 + maxRows).map(r => r.split(","));
+      let html = "<table><thead><tr>";
+      headers.forEach(h => html += `<th>${h}</th>`);
+      html += "</tr></thead><tbody>";
+      rows.forEach(r => {
+        html += "<tr>";
+        headers.forEach((_, i) => html += `<td>${(r[i] ?? "").replaceAll("<","&lt;")}</td>`);
+        html += "</tr>";
+      });
+      html += "</tbody></table>";
+      return html;
+    }
+
+    let v2_pyReadyPromise = v2_loadPy();
+    const v2_runBtn = document.getElementById("v2-runBtn");
+    const v2_downloadZipBtn = document.getElementById("v2-downloadZipBtn");
+    const v2_combineBtn = document.getElementById("v2-combineBtn");
+    const v2_combineInput = document.getElementById("v2-csvFiles");
+
+    if (v2_combineBtn) {
+      v2_combineBtn.onclick = async () => {
+        const input = v2_combineInput;
+        if (!input.files.length) {
+          alert("Please upload at least one CSV file.");
+          v2_logEvent({ message: "Combine blocked: no files selected.", level: "warning", source: "upload" });
+          v2_setCombineStatus("Idle");
+          return;
+        }
+
+        try {
+          v2_uiState.combineBusy = true;
+          v2_setCombineStatus("Combining...");
+          v2_setGlobalStatus("Working", "loading");
+          if (v2_combineBtn) v2_combineBtn.disabled = true;
+          v2_logEvent({
+            message: `Combining ${input.files.length} file(s).`,
+            level: "info",
+            source: "combine"
+          });
+
+          const pyodide = await loadPyodide();
+
+          for (let f of input.files) {
+            let data = await f.text();
+            pyodide.FS.writeFile(f.name, data);
+          }
+
+          const pythonCode = `
+import os, csv
+combined_rows = []
+for filename in os.listdir('.'):
+    if filename.endswith('.csv'):
+        with open(filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                combined_rows.append(row)
+output_file = "combined_output.csv"
+with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
+    writer = csv.writer(out_file)
+    writer.writerows(combined_rows)
+          `;
+          await pyodide.runPythonAsync(pythonCode);
+
+          let combined = pyodide.FS.readFile("combined_output.csv", { encoding: "utf8" });
+
+          let blob = new Blob([combined], { type: "text/csv" });
+          let url = URL.createObjectURL(blob);
+          let a = document.createElement("a");
+          a.href = url;
+          a.download = "combined_output.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+
+          v2_logEvent({ message: "Combine completed. Download triggered.", level: "info", source: "combine" });
+          v2_setCombineStatus("Done");
+          v2_setGlobalStatus("Ready", "idle");
+        } catch (e) {
+          console.error(e);
+          v2_logEvent({
+            message: "Combine failed: " + (e.message || String(e)),
+            level: "error",
+            source: "combine"
+          });
+          v2_setCombineStatus("Error");
+          v2_setGlobalStatus("Error", "error");
+          throw e;
+        } finally {
+          v2_uiState.combineBusy = false;
+          if (v2_combineBtn) v2_combineBtn.disabled = !input.files.length;
+        }
+      };
+    }
+
+    if (v2_runBtn) {
+      v2_runBtn.onclick = async () => {
+        v2_uiState.reconBusy = true;
+        v2_clearLogAlert();
+        v2_setStatus("Initializing...");
+        v2_setGlobalStatus("Working", "loading");
+        v2_logEvent({ message: "Reconciliation started.", level: "info", source: "reconciliation" });
+
+        const pyodide = await v2_pyReadyPromise;
+        const input = document.getElementById("v2-csvFilesForRecon");
+        if (!input.files || input.files.length !== 2) {
+          alert("Please upload exactly 2 CSV files.");
+          v2_setStatus("Idle");
+          v2_setGlobalStatus("Ready", "idle");
+          v2_logEvent({
+            message: "Reconciliation blocked: expected exactly 2 CSV files.",
+            level: "warning",
+            source: "validation"
+          });
+          v2_uiState.reconBusy = false;
+          return;
+        }
+
+        v2_setStatus("Loading files...");
+        v2_setButtonEnabled(v2_runBtn, false);
+        v2_setButtonEnabled(v2_downloadZipBtn, false);
+        const fileNames = [];
+        for (let f of input.files) {
+          const data = await f.text();
+          const safeName = f.name.replaceAll(" ", "_");
+          pyodide.FS.writeFile(safeName, data);
+          fileNames.push(safeName);
+        }
+        v2_logEvent({
+          message: "Files loaded into Pyodide workspace.",
+          level: "info",
+          source: "upload"
+        });
+
+        const pythonCode = `
+import pandas as pd, io, zipfile
+import os
+files = ${JSON.stringify([])}
+`;
+
+        await pyodide.runPythonAsync(`files = ${JSON.stringify(fileNames)}`);
+
+        const coreCode = `
+import pandas as pd, io, zipfile, json
+
+df1 = pd.read_csv(files[0])
+df2 = pd.read_csv(files[1])
+
+df1UniqueKey = (
+    df1.iloc[:, 2].astype(str).str.strip() + "_" +
+    df1.iloc[:, 8].astype(str).str.strip() + "_" +
+    df1.iloc[:, 3].astype(str).str.strip()
+)
+
+if {"Broker ID","tag","orderId"}.issubset(df2.columns):
+    order_clean = df2["orderId"].astype(str).str.lstrip("_").str.strip()
+    df2UniqueKey = (
+        df2["Broker ID"].astype(str).str.strip() + "_" +
+        df2["tag"].astype(str).str.strip() + "_" +
+        order_clean
+    )
+else:
+    order_clean = df2.iloc[:,19].astype(str).str.lstrip("_").str.strip()
+    df2UniqueKey = (
+        df2.iloc[:,1].astype(str).str.strip() + "_" +
+        df2.iloc[:,24].astype(str).str.strip() + "_" +
+        order_clean
+    )
+
+keys1 = set(df1UniqueKey)
+keys2 = set(df2UniqueKey)
+matchingkeys = keys1 & keys2
+file1onlykeys = keys1 - keys2
+file2onlykeys = keys2 - keys1
+
+df1matched = df1[df1UniqueKey.isin(matchingkeys)].copy()
+df2matched = df2[df2UniqueKey.isin(matchingkeys)].copy()
+df1matched.index = df1UniqueKey[df1UniqueKey.isin(matchingkeys)]
+df2matched.index = df2UniqueKey[df2UniqueKey.isin(matchingkeys)]
+
+commonindex = df1matched.index.intersection(df2matched.index)
+
+if "stock order date" in df2.columns:
+    datesfile2 = pd.to_datetime(df2matched["stock order date"].astype(str).str.replace(" UTC","", regex=False), errors="coerce").dt.date
+else:
+    datesfile2 = pd.to_datetime(df2matched.iloc[:,13], errors="coerce", utc=True).dt.date
+datesfile1 = pd.to_datetime(df1matched.iloc[:,6], format="%d-%b-%y", errors="coerce").dt.date
+
+if "quantity" in df2.columns:
+    quantitiesfile2 = pd.to_numeric(df2matched["quantity"], errors="coerce")
+else:
+    quantitiesfile2 = pd.to_numeric(df2matched.iloc[:,16], errors="coerce")
+quantitiesfile1 = pd.to_numeric(df1matched.iloc[:,7], errors="coerce")
+
+pricefile1 = pd.to_numeric(df1matched.iloc[:,4], errors="coerce")
+
+if {"buyamount","sell price"}.issubset(df2.columns):
+    buyamount = pd.to_numeric(df2matched["buyamount"], errors="coerce")
+    sellprice = pd.to_numeric(df2matched["sell price"], errors="coerce")
+else:
+    buyamount = pd.to_numeric(df2matched.iloc[:,17], errors="coerce")
+    sellprice = pd.to_numeric(df2matched.iloc[:,18], errors="coerce")
+
+turnoverfile1 = quantitiesfile1 * pricefile1
+turnoverfile2 = buyamount.where(buyamount.notna(), sellprice)
+
+matchingsummarydf = pd.DataFrame({
+    "UniqueKey": list(commonindex),
+    "QuantityFile1": quantitiesfile1.loc[commonindex].values,
+    "QuantityFile2": quantitiesfile2.loc[commonindex].values,
+    "TurnoverFile1": turnoverfile1.loc[commonindex].round(2).values,
+    "TurnoverFile2": turnoverfile2.loc[commonindex].round(2).values,
+    "DateFile1": datesfile1.loc[commonindex].astype(str).values,
+    "DateFile2": datesfile2.loc[commonindex].astype(str).values,
+})
+
+datemismatchmask = (datesfile1.loc[commonindex].values != datesfile2.loc[commonindex].values)
+quantitymismatchmask = (quantitiesfile1.loc[commonindex].values != quantitiesfile2.loc[commonindex].values)
+turnovermismatchmask = (turnoverfile1.loc[commonindex].round(2).values != turnoverfile2.loc[commonindex].round(2).values)
+
+datemismatchdf = pd.DataFrame({
+    "UniqueKey": pd.Index(commonindex)[datemismatchmask].tolist(),
+    "DateFile1": pd.Series(datesfile1.loc[commonindex].values)[datemismatchmask].astype(str).values,
+    "DateFile2": pd.Series(datesfile2.loc[commonindex].values)[datemismatchmask].astype(str).values,
+})
+
+quantitymismatchdf = pd.DataFrame({
+    "UniqueKey": pd.Index(commonindex)[quantitymismatchmask].tolist(),
+    "QuantityFile1": pd.Series(quantitiesfile1.loc[commonindex].values)[quantitymismatchmask].values,
+    "QuantityFile2": pd.Series(quantitiesfile2.loc[commonindex].values)[quantitymismatchmask].values,
+})
+
+turnovermismatchdf = pd.DataFrame({
+    "UniqueKey": pd.Index(commonindex)[turnovermismatchmask].tolist(),
+    "TurnoverFile1": pd.Series(turnoverfile1.loc[commonindex].round(2).values)[turnovermismatchmask].values,
+    "TurnoverFile2": pd.Series(turnoverfile2.loc[commonindex].round(2).values)[turnovermismatchmask].values,
+})
+
+missinginsmallcase = df1[df1UniqueKey.isin(file1onlykeys)].copy()
+missinginssl = df2[df2UniqueKey.isin(file2onlykeys)].copy()
+
+internaluserids = [
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
+    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
+    REDACTED_ID, REDACTED_ID, REDACTED_ID
+]
+missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
+
+def df_to_csv_str(df):
+    return df.to_csv(index=False)
+
+outputs = {
+    "MatchingUniqueKeysSummary.csv": df_to_csv_str(matchingsummarydf),
+    "Missing in smallcase.csv": df_to_csv_str(missinginsmallcase),
+    "Missing in SSL.csv": df_to_csv_str(missinginssl),
+    "Date Mismatch.csv": df_to_csv_str(datemismatchdf),
+    "Quantity Mismatch.csv": df_to_csv_str(quantitymismatchdf),
+    "Turnover Mismatch.csv": df_to_csv_str(turnovermismatchdf),
+}
+
+summary_counts = {
+    "Matching Unique Keys": len(matchingsummarydf),
+    "Missing in Smallcase": len(missinginsmallcase),
+    "Missing in SSL": len(missinginssl),
+    "Date Mismatches": len(datemismatchdf),
+    "Quantity Mismatches": len(quantitymismatchdf),
+    "Turnover Mismatches": len(turnovermismatchdf),
+}
+
+result = {
+    "counts": summary_counts,
+    "samples": {
+        "MatchingUniqueKeysSummary.csv": outputs["MatchingUniqueKeysSummary.csv"].splitlines()[:21],
+        "Date Mismatch.csv": outputs["Date Mismatch.csv"].splitlines()[:21],
+        "Quantity Mismatch.csv": outputs["Quantity Mismatch.csv"].splitlines()[:21],
+        "Turnover Mismatch.csv": outputs["Turnover Mismatch.csv"].splitlines()[:21],
+        "Missing in smallcase.csv": outputs["Missing in smallcase.csv"].splitlines()[:21],
+        "Missing in SSL.csv": outputs["Missing in SSL.csv"].splitlines()[:21],
+    }
+}
+globals()["_outputs_csv_text"] = outputs
+json.dumps(result)
+`;
+
+        try {
+          v2_setStatus("Running reconciliation...");
+          const jsonText = await pyodide.runPythonAsync(coreCode);
+          v2_setStatus("Rendering summary...");
+
+          const res = JSON.parse(jsonText);
+
+          const s = res.counts || {};
+          const summaryItems = [
+            { label: "Matching Unique Keys", value: s["Matching Unique Keys"] || 0, tone: "success" },
+            { label: "Missing in Smallcase", value: s["Missing in Smallcase"] || 0, tone: "warn" },
+            { label: "Missing in SSL", value: s["Missing in SSL"] || 0, tone: "warn" },
+            { label: "Date Mismatches", value: s["Date Mismatches"] || 0, tone: "warn" },
+            { label: "Quantity Mismatches", value: s["Quantity Mismatches"] || 0, tone: "warn" },
+            { label: "Turnover Mismatches", value: s["Turnover Mismatches"] || 0, tone: "warn" }
+          ];
+          const summaryEl = document.getElementById("v2-summary");
+          if (summaryEl) {
+            summaryEl.innerHTML = summaryItems.map(item => `
+              <div class="summary-card ${item.value ? item.tone : ""}">
+                <div class="summary-label">${item.label}</div>
+                <div class="summary-value">${item.value}</div>
+              </div>
+            `).join("");
+          }
+
+          const summaryNotice = document.getElementById("v2-summaryNotice");
+          if (summaryNotice) {
+            const total = summaryItems.reduce((sum, item) => sum + (item.value || 0), 0);
+            if (total === 0) {
+              summaryNotice.textContent = "No results returned. Verify file formats and try again.";
+            } else {
+              summaryNotice.textContent = "Review mismatches and missing records below.";
+            }
+          }
+
+          function linesToCSV(lines) { return (lines || []).join("\n"); }
+
+          const samples = res.samples || {};
+          document.getElementById("v2-matchingSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["MatchingUniqueKeysSummary.csv"]));
+          document.getElementById("v2-dateMismatchSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Date Mismatch.csv"]));
+          document.getElementById("v2-qtyMismatchSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Quantity Mismatch.csv"]));
+          document.getElementById("v2-turnoverMismatchSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Turnover Mismatch.csv"]));
+          document.getElementById("v2-missSmallcaseSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Missing in smallcase.csv"]));
+          document.getElementById("v2-missSSLSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Missing in SSL.csv"]));
+
+          const zipBytesBase64 = await pyodide.runPythonAsync(`
+import io, zipfile, base64
+buf = io.BytesIO()
+with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    for name, text in _outputs_csv_text.items():
+        zf.writestr(name, text)
+b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+b64
+`);
+          const byteChars = atob(zipBytesBase64);
+          const byteNumbers = new Array(byteChars.length);
+          for (let i = 0; i < byteChars.length; i++) byteNumbers[i] = byteChars.charCodeAt(i);
+          const zipBlob = new Blob([new Uint8Array(byteNumbers)], { type: "application/zip" });
+
+          if (v2_downloadZipBtn) {
+            v2_downloadZipBtn.disabled = false;
+            v2_downloadZipBtn.onclick = () => {
+              const url = URL.createObjectURL(zipBlob);
+              const b = document.createElement("a");
+              b.href = url;
+              b.download = "reconciliation_results.zip";
+              b.click();
+              URL.revokeObjectURL(url);
+              v2_logEvent({ message: "Results ZIP download triggered.", level: "info", source: "download" });
+            };
+          }
+
+          v2_logEvent({ message: "Reconciliation completed.", level: "info", source: "reconciliation" });
+          v2_setStatus("Done");
+          v2_setGlobalStatus("Ready", "idle");
+        } catch (e) {
+          console.error(e);
+          v2_logEvent({
+            message: "Reconciliation failed: " + (e.message || String(e)),
+            level: "error",
+            source: "reconciliation"
+          });
+          v2_setStatus("Error");
+          v2_setGlobalStatus("Error", "error");
+        } finally {
+          v2_uiState.reconBusy = false;
+          const isValid = input.files && input.files.length === 2;
+          v2_setButtonEnabled(v2_runBtn, isValid);
+        }
+      };
+    }
+  </script>
+</div>
+
+<!-- ===== Navigation Function ===== -->
+<script>
+  function switchVersion(version) {
+    document.getElementById("v1").classList.remove("active");
+    document.getElementById("v2").classList.remove("active");
+    document.getElementById(version).classList.add("active");
+
+    document.querySelectorAll(".version-tab-btn").forEach(btn => {
+      btn.classList.remove("active");
+    });
+    event.target.classList.add("active");
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Showcase</title>
+  <meta name="description" content="" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗂️</text></svg>" />
+  <link rel="stylesheet" href="assets/home.css" />
+  <!-- Config-driven: site.js + projects.js are the single source of truth;
+       home.js renders the page. Order matters, so load them with defer. -->
+  <script defer src="config/site.js"></script>
+  <script defer src="config/projects.js"></script>
+  <script defer src="assets/home.js"></script>
+</head>
+<body>
+  <main class="wrap">
+    <header class="site-head" id="siteHead"></header>
+    <section class="grid" id="grid"></section>
+    <footer class="site-foot" id="siteFoot"></footer>
+  </main>
+</body>
+</html>
