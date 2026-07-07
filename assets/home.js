@@ -15,14 +15,8 @@
     var meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', SITE.tagline);
   }
-  if (SITE.emoji) {
-    var icon = document.querySelector('link[rel="icon"]');
-    if (icon) {
-      icon.setAttribute('href',
-        "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-        "<text y='.9em' font-size='90'>" + SITE.emoji + "</text></svg>");
-    }
-  }
+  // Favicon is a real file (/favicon.svg) referenced statically in index.html —
+  // Vercel's dashboard renders that as the project icon; the on-page header still uses SITE.emoji.
   if (SITE.accent) document.documentElement.style.setProperty('--accent', SITE.accent);
 
   /* ---- Header ---- */
