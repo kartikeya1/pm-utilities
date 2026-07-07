@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HDFC SSO Link Builder</title>
+<style>
+  :root {
+    --indigo: #3737CC;
+    --green: #00AC6E;
+    --offwhite: #F5F5F5;
+    --ink: #1A1A2E;
+    --border: #DADAE6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--offwhite);
+    color: var(--ink);
+    padding: 32px 16px;
+  }
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 24px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  input[type="text"]:focus {
+    outline: 2px solid var(--indigo);
+    outline-offset: 1px;
+    border-color: var(--indigo);
+  }
+  .hint {
+    font-size: 11px;
+    color: #999;
+    grid-column: 2;
+    margin-top: -8px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .checkbox-row label {
+    font-size: 13px;
+  }
+  button {
+    background: var(--indigo);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.9; }
+  button.secondary {
+    background: #fff;
+    color: var(--indigo);
+    border: 1px solid var(--indigo);
+  }
+  .output-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .output-box {
+    background: #1A1A2E;
+    color: #B8F2D0;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    padding: 14px;
+    border-radius: 6px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    min-height: 40px;
+  }
+  .copy-btn {
+    background: transparent;
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 4px;
+  }
+  .copy-btn.copied {
+    background: var(--green);
+    color: #fff;
+  }
+  .json-preview {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px;
+    color: #777;
+    margin-top: 10px;
+    word-break: break-all;
+  }
+  .footer-note {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>HDFC SSO Link Builder</h1>
+  <p class="sub">Builds the percent-encoded invest-right-2022 SSO URL with a minified JSON extra_param. No more manual encoding.</p>
+
+  <div class="card">
+    <div class="row">
+      <label for="path">Path</label>
+      <div>
+        <input type="text" id="path" placeholder="/smallcase/HDNM_0014" value="/smallcase/HDNM_0014">
+      </div>
+    </div>
+    <div class="hint">e.g. /smallcase/SCID, /collection/ID, /discover/explore</div>
+
+    <div class="row">
+      <label for="utm_source">utm_source</label>
+      <input type="text" id="utm_source" value="IR">
+    </div>
+    <div class="row">
+      <label for="utm_medium">utm_medium</label>
+      <input type="text" id="utm_medium" value="inapp">
+    </div>
+    <div class="row">
+      <label for="utm_campaign">utm_campaign</label>
+      <input type="text" id="utm_campaign" value="br-markering">
+    </div>
+    <div class="row">
+      <label for="utm_content">utm_content</label>
+      <input type="text" id="utm_content" value="">
+    </div>
+    <div class="row">
+      <label for="utm_term">utm_term</label>
+      <input type="text" id="utm_term" value="">
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="add_params" checked>
+      <label for="add_params">add_params: true</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <button onclick="build()">Build link</button>
+    <button class="secondary" onclick="resetForm()" style="margin-left:8px;">Reset</button>
+
+    <div style="margin-top:18px;">
+      <div class="output-label">
+        Encoded URL
+        <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy</button>
+      </div>
+      <div class="output-box" id="output">Click "Build link" to generate.</div>
+    </div>
+
+    <div class="json-preview" id="jsonPreview"></div>
+  </div>
+
+  <p class="footer-note">Base: https://www.hdfcsec.com/invest-right-2022?key=sso&sso_key=IR_SMALLCASE&extra_param=&lt;encoded JSON&gt;</p>
+</div>
+
+<script>
+function build() {
+  const path = document.getElementById('path').value.trim();
+  const utm_source = document.getElementById('utm_source').value.trim();
+  const utm_medium = document.getElementById('utm_medium').value.trim();
+  const utm_campaign = document.getElementById('utm_campaign').value.trim();
+  const utm_content = document.getElementById('utm_content').value.trim();
+  const utm_term = document.getElementById('utm_term').value.trim();
+  const add_params = document.getElementById('add_params').checked;
+
+  const obj = {
+    path: path,
+    utm_source: utm_source,
+    utm_medium: utm_medium,
+    utm_campaign: utm_campaign,
+    utm_content: utm_content,
+    utm_term: utm_term,
+    add_params: add_params
+  };
+
+  const jsonStr = JSON.stringify(obj);
+  const encoded = encodeURIComponent(jsonStr);
+  const fullUrl = `https://www.hdfcsec.com/invest-right-2022?key=sso&sso_key=IR_SMALLCASE&extra_param=${encoded}`;
+
+  document.getElementById('output').textContent = fullUrl;
+  document.getElementById('jsonPreview').textContent = 'JSON: ' + jsonStr;
+  document.getElementById('copyBtn').textContent = 'Copy';
+  document.getElementById('copyBtn').classList.remove('copied');
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').textContent;
+  if (!text || text.startsWith('Click')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1500);
+  });
+}
+
+function resetForm() {
+  document.getElementById('path').value = '';
+  document.getElementById('utm_source').value = '';
+  document.getElementById('utm_medium').value = 'inapp';
+  document.getElementById('utm_campaign').value = '';
+  document.getElementById('utm_content').value = '';
+  document.getElementById('utm_term').value = '';
+  document.getElementById('add_params').checked = true;
+  document.getElementById('output').textContent = 'Click "Build link" to generate.';
+  document.getElementById('jsonPreview').textContent = '';
+}
+
+build();
+</script>
+</body>
+</html>

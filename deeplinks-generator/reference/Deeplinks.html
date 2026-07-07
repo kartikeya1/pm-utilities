@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>smallcase Deep Links Generator</title>
+
+<!-- Inline SVG favicon (a link/chain glyph). Kept inline so the page stays
+     fully self-contained — no external asset requests (works offline / on any host). -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%97%3C/text%3E%3C/svg%3E" />
+
+<style>
+/* ============================================================================
+   THEME TOKENS
+   Everything visual is driven by these CSS variables. To re-skin the whole app
+   (e.g. for a new broker's brand), you only need to touch this block.
+   ============================================================================ */
+:root {
+  /* Surfaces & text */
+  --bg: #eef2f9;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-muted: #64748b;
+
+  /* Brand / primary action */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: #eff6ff;
+  --ring: rgba(37, 99, 235, 0.30);
+
+  /* Status colors */
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
+  --danger: #dc2626;
+  --danger-bg: #fee2e2;
+  --danger-text: #991b1b;
+
+  /* Product chip accents */
+  --chip-eq-bg: #eff6ff;   --chip-eq-tx: #1d4ed8;
+  --chip-mtf-bg: #fff7ed;  --chip-mtf-tx: #c2410c;
+  --chip-sky-bg: #f5f3ff;  --chip-sky-tx: #7c3aed;
+
+  /* Shape & depth */
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+/* ---- DARK THEME: cards are lifted above the background so they read as panels ---- */
+[data-theme="dark"] {
+  --bg: #0b1120;
+  --surface: #131c31;
+  --surface-2: #0f1729;
+  --border: #24314a;
+  --border-strong: #37476a;
+  --text: #e6ebf5;
+  --text-muted: #94a3b8;
+
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-soft: #172554;
+  --ring: rgba(96, 165, 250, 0.35);
+
+  --success-bg: #052e16;  --success-text: #86efac;
+  --danger-bg: #450a0a;   --danger-text: #fca5a5;
+
+  --chip-eq-bg: #172554;   --chip-eq-tx: #93c5fd;
+  --chip-mtf-bg: #3a1e08;  --chip-mtf-tx: #fdba74;
+  --chip-sky-bg: #2a1a52;  --chip-sky-tx: #c4b5fd;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================================
+   GLOBAL / LAYOUT
+   ============================================================================ */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 40px 16px 64px;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container { max-width: 760px; margin: auto; }
+
+/* ============================================================================
+   HEADER
+   ============================================================================ */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.title-block h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.title-block p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 9px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease;
+}
+.theme-toggle:hover { border-color: var(--border-strong); }
+.theme-toggle:active { transform: translateY(1px); }
+
+/* ============================================================================
+   TABS (segmented control)
+   ============================================================================ */
+.tabs-container {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-button {
+  flex: 1;
+  padding: 11px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.tab-button:hover { color: var(--text); }
+.tab-button.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px var(--ring);
+}
+
+/* Tab panels: only the active one is shown */
+.tab-content { display: none; animation: fade 0.25s ease; }
+.tab-content.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Short explainer shown at the top of each tab */
+.tab-intro {
+  font-size: 14px;
+  color: var(--text-muted);
+  background: var(--primary-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+/* ============================================================================
+   CARD (one generator per card)
+   ============================================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow);
+}
+
+.card-head { margin-bottom: 18px; }
+
+.card-titles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+.card h2 a {
+  color: var(--text);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.card h2 a:hover { color: var(--primary); }
+.card h2 a svg { opacity: 0.5; transition: opacity 0.2s ease; }
+.card h2 a:hover svg { opacity: 1; }
+
+/* Product chips */
+.chip {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+.chip-eq  { background: var(--chip-eq-bg);  color: var(--chip-eq-tx); }
+.chip-mtf { background: var(--chip-mtf-bg); color: var(--chip-mtf-tx); }
+.chip-sky { background: var(--chip-sky-bg); color: var(--chip-sky-tx); }
+
+/* ============================================================================
+   FORM FIELDS
+   ============================================================================ */
+.field { margin-bottom: 4px; }
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.3s ease;
+}
+input[type="text"]::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+input[type="text"]:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--ring);
+  background: var(--surface);
+}
+
+/* Red state — only applied when a real error is asserted (on Generate), never mid-typing */
+input.error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+}
+
+/* Small helper text under an input */
+.hint {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.hint code, .tab-intro code, .utm .hint code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* Inline validation badge (shown next to the field label) */
+.badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: none; /* toggled by JS */
+}
+.badge.valid   { background: var(--success-bg); color: var(--success-text); }
+.badge.invalid { background: var(--danger-bg);  color: var(--danger-text); }
+
+/* Hard error message under the input (shown on a failed Generate) */
+.error-text {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--danger);
+  display: none; /* toggled by JS */
+}
+
+/* ============================================================================
+   UTM PARAMETERS BLOCK (HDFC IR & MTF only)
+   ============================================================================ */
+.utm {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+.utm-head {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.utm-head .muted { color: var(--text-muted); font-weight: 500; }
+.utm .hint { margin-bottom: 14px; }
+
+.utm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field-sm label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.field-sm input[type="text"] { padding: 10px 12px; }
+
+/* add_params toggle */
+.switch-field { display: flex; flex-direction: column; justify-content: center; }
+.switch-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+.switch-label input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+
+/* ============================================================================
+   ACTIONS (buttons)
+   ============================================================================ */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0 0;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn.primary {
+  flex: 1;
+  min-width: 180px;
+  background: var(--primary);
+  color: #fff;
+}
+.btn.primary:hover { background: var(--primary-hover); }
+
+.btn.ghost {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.btn.ghost:hover { background: var(--surface-2); border-color: var(--text-muted); }
+
+/* Small copy button that lives in the output header */
+.btn.copy {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text-muted);
+}
+.btn.copy:hover { color: var(--primary); border-color: var(--primary); }
+
+/* ============================================================================
+   OUTPUT
+   ============================================================================ */
+.output { margin-top: 18px; }
+.output-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.output-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+textarea {
+  min-height: 96px;
+  resize: vertical;
+  font-family: "SF Mono", "JetBrains Mono", Consolas, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* ============================================================================
+   FOOTER / SHORTCUTS
+   ============================================================================ */
+.shortcuts {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.shortcuts kbd {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+}
+.shortcuts .sep { margin: 0 10px; opacity: 0.5; }
+
+/* ============================================================================
+   TOAST (transient bottom-right notifications)
+   ============================================================================ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  max-width: 320px;
+  padding: 13px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  background: #0f172a;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: var(--shadow);
+  z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.toast-success { background: var(--success); }
+.toast.toast-error   { background: var(--danger); }
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+@media (max-width: 560px) {
+  body { padding: 24px 12px 48px; }
+  .utm-grid { grid-template-columns: 1fr; }
+  .btn.primary { min-width: 0; width: 100%; }
+  .actions { flex-direction: column; }
+  .title-block h1 { font-size: 22px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- ============================ HEADER ============================ -->
+  <header>
+    <div class="title-block">
+      <h1>smallcase Deep Links Generator</h1>
+      <p>Convert a broker's smallcase web URL into a ready-to-use in-app deep link.</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark / light theme">
+      <span id="themeIcon">🌙</span><span id="themeLabel">Dark</span>
+    </button>
+  </header>
+
+  <!-- ============================ TABS ============================ -->
+  <!-- Each button passes `this` to switchTab so we never depend on the
+       implicit global `event` (see JS note). -->
+  <div class="tabs-container">
+    <button class="tab-button active" onclick="switchTab('sbi', this)">SBI</button>
+    <button class="tab-button" onclick="switchTab('hdfc', this)">HDFC</button>
+  </div>
+
+  <!-- ============================================================
+       SBI TAB
+       ============================================================ -->
+  <div id="sbi-content" class="tab-content active">
+    <div class="tab-intro">
+      Paste an <strong>SBI Securities</strong> smallcase web URL below and hit Generate to get the
+      <code>mobile.sbisecurities.in</code> app deep link.
+    </div>
+
+    <!-- SBI Equity -->
+    <div class="card" id="sbi-eq-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-eq">Equity</span>
+          <h2>
+            <a href="https://smallcases.sbisecurities.in/" target="_blank" rel="noopener">
+              SBI Securities · Equity smallcases
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="sbiEqInput">smallcase URL</label>
+          <span id="sbieqBadge" class="badge"></span>
+        </div>
+        <input id="sbiEqInput" type="text"
+               placeholder="https://smallcases.sbisecurities.in/smallcase/SBITR_0001"
+               oninput="liveValidate(this,'https://smallcases.sbisecurities.in',sbieqBadge,sbieqErr)" />
+        <p class="hint">Must start with <code>smallcases.sbisecurities.in</code></p>
+        <div id="sbieqErr" class="error-text">Invalid Equity smallcase URL</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateSBIEQ()">Generate deep link</button>
+        <button class="btn ghost" onclick="loadSBIEQSample()">Load sample</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('sbiEqOutput')">Copy</button>
+        </div>
+        <textarea id="sbiEqOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
+      </div>
+    </div>
+
+    <!-- SBI MTF -->
+    <div class="card" id="sbi-mtf-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-mtf">MTF</span>
+          <h2>
+            <a href="https://mtfbaskets.sbisecurities.in/" target="_blank" rel="noopener">
+              SBI Securities · MTF Baskets
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="sbiMtfInput">MTF basket URL</label>
+          <span id="sbimtfBadge" class="badge"></span>
+        </div>
+        <input id="sbiMtfInput" type="text"
+               placeholder="https://mtfbaskets.sbisecurities.in/smallcase/GOALMX_0011"
+               oninput="liveValidate(this,'https://mtfbaskets.sbisecurities.in',sbimtfBadge,sbimtfErr)" />
+        <p class="hint">Must start with <code>mtfbaskets.sbisecurities.in</code></p>
+        <div id="sbimtfErr" class="error-text">Invalid MTF basket URL</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateSBIMTF()">Generate deep link</button>
+        <button class="btn ghost" onclick="loadSBIMTFSample()">Load sample</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('sbiMtfOutput')">Copy</button>
+        </div>
+        <textarea id="sbiMtfOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       HDFC TAB
+       ============================================================ -->
+  <div id="hdfc-content" class="tab-content">
+    <div class="tab-intro">
+      Paste an <strong>HDFC</strong> smallcase web URL below. IR &amp; MTF links support optional
+      <strong>UTM parameters</strong>, which are bundled into the <code>extra_param</code> JSON payload.
+    </div>
+
+    <!-- HDFC IR -->
+    <div class="card" id="hdfc-ir-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-eq">Invest Right</span>
+          <h2>
+            <a href="https://basketinvesting.hdfcsec.com/" target="_blank" rel="noopener">
+              HDFC Securities · IR smallcases
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="hdfc_irInput">smallcase URL</label>
+          <span id="hdfcirBadge" class="badge"></span>
+        </div>
+        <input id="hdfc_irInput" type="text"
+               placeholder="https://basketinvesting.hdfcsec.com/smallcase/HDNM_0014"
+               oninput="liveValidate(this,'https://basketinvesting.hdfcsec.com',hdfcirBadge,hdfcirErr)" />
+        <p class="hint">Must start with <code>basketinvesting.hdfcsec.com</code></p>
+        <div id="hdfcirErr" class="error-text">Invalid IR smallcase URL</div>
+      </div>
+
+      <!-- UTM block — values are read by generateHDFCIR() and bundled into extra_param JSON -->
+      <div class="utm">
+        <div class="utm-head">UTM parameters <span class="muted">(optional)</span></div>
+        <p class="hint">Bundled into the <code>extra_param</code> JSON. Blank fields are still sent as empty strings.</p>
+        <div class="utm-grid">
+          <div class="field-sm">
+            <label for="hdfc_ir_utm_source">utm_source</label>
+            <input id="hdfc_ir_utm_source" type="text" placeholder="e.g. ir" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_ir_utm_medium">utm_medium</label>
+            <input id="hdfc_ir_utm_medium" type="text" placeholder="e.g. inapp" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_ir_utm_campaign">utm_campaign</label>
+            <input id="hdfc_ir_utm_campaign" type="text" placeholder="e.g. br-marketing" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_ir_utm_content">utm_content</label>
+            <input id="hdfc_ir_utm_content" type="text" placeholder="optional" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_ir_utm_term">utm_term</label>
+            <input id="hdfc_ir_utm_term" type="text" placeholder="optional" />
+          </div>
+          <div class="field-sm switch-field">
+            <label class="switch-label" for="hdfc_ir_add_params">
+              <input id="hdfc_ir_add_params" type="checkbox" checked />
+              add_params
+            </label>
+            <span class="hint">Adds <code>"add_params": true</code></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateHDFCIR()">Generate deep link</button>
+        <button class="btn ghost" onclick="loadHDFCIRSample()">Load sample</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('hdfc_irOutput')">Copy</button>
+        </div>
+        <textarea id="hdfc_irOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
+      </div>
+    </div>
+
+    <!-- HDFC MTF -->
+    <div class="card" id="hdfc-mtf-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-mtf">MTF</span>
+          <h2>
+            <a href="https://mtfbaskets.hdfcsec.com/" target="_blank" rel="noopener">
+              HDFC Securities · MTF Baskets
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="hdfc_mtfInput">MTF basket URL</label>
+          <span id="hdfcmtfBadge" class="badge"></span>
+        </div>
+        <input id="hdfc_mtfInput" type="text"
+               placeholder="https://mtfbaskets.hdfcsec.com/smallcase/HDFCNM_0001"
+               oninput="liveValidate(this,'https://mtfbaskets.hdfcsec.com',hdfcmtfBadge,hdfcmtfErr)" />
+        <p class="hint">Must start with <code>mtfbaskets.hdfcsec.com</code></p>
+        <div id="hdfcmtfErr" class="error-text">Invalid MTF basket URL</div>
+      </div>
+
+      <!-- UTM block — values are read by generateHDFCMTF() and bundled into extra_param JSON -->
+      <div class="utm">
+        <div class="utm-head">UTM parameters <span class="muted">(optional)</span></div>
+        <p class="hint">Bundled into the <code>extra_param</code> JSON. Blank fields are still sent as empty strings.</p>
+        <div class="utm-grid">
+          <div class="field-sm">
+            <label for="hdfc_mtf_utm_source">utm_source</label>
+            <input id="hdfc_mtf_utm_source" type="text" placeholder="e.g. mtf" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_mtf_utm_medium">utm_medium</label>
+            <input id="hdfc_mtf_utm_medium" type="text" placeholder="e.g. inapp" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_mtf_utm_campaign">utm_campaign</label>
+            <input id="hdfc_mtf_utm_campaign" type="text" placeholder="e.g. br-marketing" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_mtf_utm_content">utm_content</label>
+            <input id="hdfc_mtf_utm_content" type="text" placeholder="optional" />
+          </div>
+          <div class="field-sm">
+            <label for="hdfc_mtf_utm_term">utm_term</label>
+            <input id="hdfc_mtf_utm_term" type="text" placeholder="optional" />
+          </div>
+          <div class="field-sm switch-field">
+            <label class="switch-label" for="hdfc_mtf_add_params">
+              <input id="hdfc_mtf_add_params" type="checkbox" checked />
+              add_params
+            </label>
+            <span class="hint">Adds <code>"add_params": true</code></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateHDFCMTF()">Generate deep link</button>
+        <button class="btn ghost" onclick="loadHDFCMTFSample()">Load sample</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('hdfc_mtfOutput')">Copy</button>
+        </div>
+        <textarea id="hdfc_mtfOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
+      </div>
+    </div>
+
+    <!-- HDFC Sky -->
+    <div class="card" id="hdfc-sky-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-sky">Sky</span>
+          <h2>
+            <a href="https://invest.hdfcsky.com/" target="_blank" rel="noopener">
+              HDFC Sky · smallcases
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="hdfc_skyInput">smallcase URL</label>
+          <span id="hdfcskyBadge" class="badge"></span>
+        </div>
+        <input id="hdfc_skyInput" type="text"
+               placeholder="https://invest.hdfcsky.com/smallcase/HDFCTR_0001"
+               oninput="liveValidate(this,'https://invest.hdfcsky.com',hdfcskyBadge,hdfcskyErr)" />
+        <p class="hint">Must start with <code>invest.hdfcsky.com</code></p>
+        <div id="hdfcskyErr" class="error-text">Invalid HDFC Sky smallcase URL</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateHDFCSky()">Generate deep link</button>
+        <button class="btn ghost" onclick="loadHDFCSkySample()">Load sample</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('hdfc_skyOutput')">Copy</button>
+        </div>
+        <textarea id="hdfc_skyOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ FOOTER ============================ -->
+  <div class="shortcuts">
+    <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> Generate
+    <span class="sep">·</span>
+    <kbd>⌘/Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> Copy
+    <span class="sep">·</span>
+    <kbd>⌘/Ctrl</kbd> + <kbd>J</kbd> Toggle theme
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================================
+   smallcase Deep Links Generator — application script
+   ----------------------------------------------------------------------------
+   HOW THIS FILE IS ORGANISED (please read README.md before editing):
+
+     1. UI HELPERS      — theme, tabs, toast, clipboard, live validation.
+                          Safe to restyle / tweak. This is presentation only.
+
+     2. VALIDATION GATE — validate(): the strict prefix check that GATES link
+                          generation. Business logic — do not weaken it.
+
+     3. GENERATORS      — one generate*() per product. These build the actual
+                          deep-link strings. *** BUSINESS LOGIC — DO NOT EDIT
+                          the URL templates, encoding, JSON shape or sso_keys.
+                          They are verified correct. ***
+
+     4. SAMPLE LOADERS  — fill demo data for quick testing.
+
+     5. KEYBOARD SHORTCUTS.
+
+   ADDING A NEW BROKER (e.g. Axis / Axis MTF): follow the step-by-step recipe
+   in README.md → "Adding a new broker". In short: add a card in the HTML
+   (reusing the existing ID naming convention), add a generate*() function
+   here, add a sample loader, and wire it into the keyboard-shortcut router.
+
+   NOTE ON GLOBALS: browsers expose every element with an id="x" as a global
+   variable `x`. The generators rely on this (e.g. `sbiEqInput`), so element
+   IDs MUST NOT be renamed without also updating the JS.
+   ============================================================================ */
+
+/* ============================================================================
+   1. UI HELPERS
+   ============================================================================ */
+
+/* ---- Theme (persisted in localStorage) ---- */
+const root = document.documentElement;
+root.dataset.theme = localStorage.theme || "light";
+
+function toggleTheme() {
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.theme = root.dataset.theme;
+  updateThemeToggle();
+  showToast(`Switched to ${root.dataset.theme} mode`);
+}
+
+/* Keeps the toggle's icon/label in sync with the current theme. */
+function updateThemeToggle() {
+  const isDark = root.dataset.theme === "dark";
+  const icon = document.getElementById("themeIcon");
+  const label = document.getElementById("themeLabel");
+  if (icon)  icon.textContent = isDark ? "☀️" : "🌙";
+  if (label) label.textContent = isDark ? "Light" : "Dark";
+}
+// The script lives in <head>, so wait for the DOM before touching elements.
+window.addEventListener("DOMContentLoaded", updateThemeToggle);
+
+/* ---- Tabs ----
+   Receives the clicked button explicitly (`btn`) instead of relying on the
+   implicit global `event`, which is deprecated and breaks in strict setups. */
+function switchTab(tabName, btn) {
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+  document.getElementById(tabName + "-content").classList.add("active");
+  if (btn) btn.classList.add("active");
+}
+
+/* ---- Toast ----
+   Colour is inferred from the message text so the generators don't need to
+   pass a type (keeps their call sites untouched). */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  const isError = /invalid|error|failed|nothing/i.test(msg);
+  t.className = "toast show " + (isError ? "toast-error" : "toast-success");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = "toast"; }, 2400);
+}
+
+/* ---- Clipboard ----
+   Gives explicit feedback whether the copy succeeds, fails, or there's nothing
+   to copy (the old version failed silently). */
+function copyToClipboard(id) {
+  const el = document.getElementById(id);
+  if (!el || !el.value) {
+    showToast("Nothing to copy — generate a link first");
+    return;
+  }
+  navigator.clipboard.writeText(el.value)
+    .then(() => showToast("Copied to clipboard"))
+    .catch(() => showToast("Copy failed — select the text and copy manually"));
+}
+
+/* ---- Live validation (runs on every keystroke) ----
+   FRIENDLY by design: it only ever shows the positive "Valid" badge and always
+   clears any red error state. It NEVER shows a red error while the user is
+   still typing — that was the old "phantom error" bug. The hard invalid state
+   is asserted only on an actual Generate attempt, by validate() below. */
+function liveValidate(input, domain, badge, err) {
+  const v = input.value.trim();
+
+  // Any edit clears a previously-shown hard error.
+  input.classList.remove("error");
+  err.style.display = "none";
+
+  if (!v) {                    // empty → fully neutral
+    badge.style.display = "none";
+    return;
+  }
+  if (v.startsWith(domain)) {  // matches → green "Valid"
+    badge.style.display = "inline-block";
+    badge.className = "badge valid";
+    badge.textContent = "Valid";
+  } else {                     // not yet valid, but still typing → stay neutral
+    badge.style.display = "none";
+  }
+}
+
+/* ============================================================================
+   2. VALIDATION GATE  (business logic — the strict check that gates Generate)
+   ----------------------------------------------------------------------------
+   Called by every generator and by the sample loaders. Unlike liveValidate,
+   this DOES show the red invalid state, because reaching here means the user
+   has committed to generating — so a bad URL is a real, reportable error.
+   ============================================================================ */
+function validate(input, domain, badge, err) {
+  const v = input.value.trim();
+  badge.style.display = "inline-block";
+
+  if (v.startsWith(domain)) {
+    badge.className = "badge valid";
+    badge.textContent = "Valid";
+    input.classList.remove("error");
+    err.style.display = "none";
+    return true;
+  }
+
+  badge.className = "badge invalid";
+  badge.textContent = "Invalid";
+  input.classList.add("error");
+  err.style.display = "block";
+  return false;
+}
+
+/* ---- Shared encoder used by the SBI generators ---- */
+function base64Encode(input) {
+  return btoa(input).replace(/=+$/, "");
+}
+
+/* ============================================================================
+   3. GENERATORS  — *** BUSINESS LOGIC: DO NOT EDIT THE OUTPUT TEMPLATES ***
+   Each function: (1) validates the URL, (2) splits base path from query, and
+   (3) assembles the broker-specific deep link. The exact string formats,
+   encoding schemes, JSON shapes and sso_keys below are verified correct.
+   ============================================================================ */
+
+/* SBI Equity → mobile.sbisecurities.in/invest (base64-encoded path & params). */
+function generateSBIEQ() {
+  const i = sbiEqInput, o = sbiEqOutput;
+  if (!validate(i, "https://smallcases.sbisecurities.in", sbieqBadge, sbieqErr)) {
+    showToast("Invalid EQ URL");
+    return;
+  }
+
+  try {
+    const [b, p] = i.value.split("?");
+    const u = new URL(b);
+    const path = u.pathname + u.hash;
+
+    o.value =
+      `https://mobile.sbisecurities.in/invest?category=smallcase` +
+      `&path=${base64Encode(encodeURIComponent(path))}` +
+      `&params=${base64Encode(encodeURIComponent(p || ""))}`;
+
+    showToast("EQ deep link generated");
+  } catch {
+    o.value = "⚠️ Error generating link";
+    showToast("Error generating link");
+  }
+}
+
+/* SBI MTF → mobile.sbisecurities.in/dashboard (base64-encoded path & params). */
+function generateSBIMTF() {
+  const i = sbiMtfInput, o = sbiMtfOutput;
+  if (!validate(i, "https://mtfbaskets.sbisecurities.in", sbimtfBadge, sbimtfErr)) {
+    showToast("Invalid MTF URL");
+    return;
+  }
+
+  try {
+    const [b, p] = i.value.split("?");
+    const u = new URL(b);
+    const path = u.pathname + u.hash;
+
+    o.value =
+      `https://mobile.sbisecurities.in/dashboard?tab=explore&category=mtf_baskets` +
+      `&path=${base64Encode(encodeURIComponent(path))}` +
+      `&params=${base64Encode(encodeURIComponent(p || ""))}`;
+
+    showToast("MTF deep link generated");
+  } catch {
+    o.value = "⚠️ Error generating link";
+    showToast("Error generating link");
+  }
+}
+
+/* HDFC IR → hdfcsec.com invest-right SSO. UTM fields + path are packed into a
+   JSON object, JSON.stringify'd and percent-encoded into `extra_param`. */
+function generateHDFCIR() {
+  const i = hdfc_irInput, o = hdfc_irOutput;
+  if (!validate(i, "https://basketinvesting.hdfcsec.com", hdfcirBadge, hdfcirErr)) {
+    showToast("Invalid IR URL");
+    return;
+  }
+
+  try {
+    const [b, p] = i.value.split("?");
+    const u = new URL(b);
+    const path = u.pathname + u.hash;
+
+    const utm_source = document.getElementById('hdfc_ir_utm_source').value.trim();
+    const utm_medium = document.getElementById('hdfc_ir_utm_medium').value.trim();
+    const utm_campaign = document.getElementById('hdfc_ir_utm_campaign').value.trim();
+    const utm_content = document.getElementById('hdfc_ir_utm_content').value.trim();
+    const utm_term = document.getElementById('hdfc_ir_utm_term').value.trim();
+    const add_params = document.getElementById('hdfc_ir_add_params').checked;
+
+    const extraParamObj = {
+      path: path,
+      utm_source: utm_source,
+      utm_medium: utm_medium,
+      utm_campaign: utm_campaign,
+      utm_content: utm_content,
+      utm_term: utm_term,
+      add_params: add_params
+    };
+
+    const encodedExtraParam = encodeURIComponent(JSON.stringify(extraParamObj));
+
+    o.value =
+      `https://www.hdfcsec.com/invest-right-2022?key=sso&sso_key=IR_SMALLCASE` +
+      `&extra_param=${encodedExtraParam}`;
+
+    showToast("IR deep link generated");
+  } catch {
+    o.value = "⚠️ Error generating link";
+    showToast("Error generating link");
+  }
+}
+
+/* HDFC MTF → identical packing to IR, but with the MTF sso_key. */
+function generateHDFCMTF() {
+  const i = hdfc_mtfInput, o = hdfc_mtfOutput;
+  if (!validate(i, "https://mtfbaskets.hdfcsec.com", hdfcmtfBadge, hdfcmtfErr)) {
+    showToast("Invalid MTF URL");
+    return;
+  }
+
+  try {
+    const [b, p] = i.value.split("?");
+    const u = new URL(b);
+    const path = u.pathname + u.hash;
+
+    const utm_source = document.getElementById('hdfc_mtf_utm_source').value.trim();
+    const utm_medium = document.getElementById('hdfc_mtf_utm_medium').value.trim();
+    const utm_campaign = document.getElementById('hdfc_mtf_utm_campaign').value.trim();
+    const utm_content = document.getElementById('hdfc_mtf_utm_content').value.trim();
+    const utm_term = document.getElementById('hdfc_mtf_utm_term').value.trim();
+    const add_params = document.getElementById('hdfc_mtf_add_params').checked;
+
+    const extraParamObj = {
+      path: path,
+      utm_source: utm_source,
+      utm_medium: utm_medium,
+      utm_campaign: utm_campaign,
+      utm_content: utm_content,
+      utm_term: utm_term,
+      add_params: add_params
+    };
+
+    const encodedExtraParam = encodeURIComponent(JSON.stringify(extraParamObj));
+
+    o.value =
+      `https://www.hdfcsec.com/invest-right-2022?key=sso&sso_key=IR_MTF_BASKET_SMALLCASE` +
+      `&extra_param=${encodedExtraParam}`;
+
+    showToast("MTF deep link generated");
+  } catch {
+    o.value = "⚠️ Error generating link";
+    showToast("Error generating link");
+  }
+}
+
+/* HDFC Sky → hdfcsky.com small-case route (plain percent-encoded path/params). */
+function generateHDFCSky() {
+  const i = hdfc_skyInput, o = hdfc_skyOutput;
+  if (!validate(i, "https://invest.hdfcsky.com", hdfcskyBadge, hdfcskyErr)) {
+    showToast("Invalid HDFC Sky URL");
+    return;
+  }
+
+  try {
+    const [b, p] = i.value.split("?");
+    const u = new URL(b);
+    const path = u.pathname + u.hash;
+
+    o.value =
+      `https://hdfcsky.com/sky/hdfc-small-case` +
+      `&path=${encodeURIComponent(path)}` +
+      `&params=${encodeURIComponent(p || "")}` +
+      `&add_params=true`;
+
+    showToast("HDFC Sky deep link generated");
+  } catch {
+    o.value = "⚠️ Error generating link";
+    showToast("Error generating link");
+  }
+}
+
+/* ============================================================================
+   4. SAMPLE DATA LOADERS
+   Fill each field with a realistic example so the tool can be tried instantly.
+   HDFC IR & MTF also seed sample UTM values.
+   ============================================================================ */
+function loadSBIEQSample() {
+  document.getElementById('sbiEqInput').value = 'https://smallcases.sbisecurities.in/smallcase/SBITR_0001';
+  validate(document.getElementById('sbiEqInput'), 'https://smallcases.sbisecurities.in', sbieqBadge, sbieqErr);
+}
+
+function loadSBIMTFSample() {
+  document.getElementById('sbiMtfInput').value = 'https://mtfbaskets.sbisecurities.in/smallcase/GOALMX_0011';
+  validate(document.getElementById('sbiMtfInput'), 'https://mtfbaskets.sbisecurities.in', sbimtfBadge, sbimtfErr);
+}
+
+function loadHDFCIRSample() {
+  document.getElementById('hdfc_irInput').value = 'https://basketinvesting.hdfcsec.com/smallcase/HDNM_0014';
+  document.getElementById('hdfc_ir_utm_source').value = 'ir';
+  document.getElementById('hdfc_ir_utm_medium').value = 'inapp';
+  document.getElementById('hdfc_ir_utm_campaign').value = 'br-marketing';
+  document.getElementById('hdfc_ir_utm_content').value = '';
+  document.getElementById('hdfc_ir_utm_term').value = '';
+  document.getElementById('hdfc_ir_add_params').checked = true;
+  validate(document.getElementById('hdfc_irInput'), 'https://basketinvesting.hdfcsec.com', hdfcirBadge, hdfcirErr);
+}
+
+function loadHDFCMTFSample() {
+  document.getElementById('hdfc_mtfInput').value = 'https://mtfbaskets.hdfcsec.com/smallcase/HDFCNM_0001';
+  document.getElementById('hdfc_mtf_utm_source').value = 'mtf';
+  document.getElementById('hdfc_mtf_utm_medium').value = 'inapp';
+  document.getElementById('hdfc_mtf_utm_campaign').value = 'br-marketing';
+  document.getElementById('hdfc_mtf_utm_content').value = '';
+  document.getElementById('hdfc_mtf_utm_term').value = '';
+  document.getElementById('hdfc_mtf_add_params').checked = true;
+  validate(document.getElementById('hdfc_mtfInput'), 'https://mtfbaskets.hdfcsec.com', hdfcmtfBadge, hdfcmtfErr);
+}
+
+function loadHDFCSkySample() {
+  document.getElementById('hdfc_skyInput').value = 'https://invest.hdfcsky.com/smallcase/HDFCTR_0001';
+  validate(document.getElementById('hdfc_skyInput'), 'https://invest.hdfcsky.com', hdfcskyBadge, hdfcskyErr);
+}
+
+/* ============================================================================
+   5. KEYBOARD SHORTCUTS
+   Routes to the correct action based on the active tab and the card the focus
+   is currently inside (detected via .closest() on the card IDs). When adding a
+   broker, extend the routers below to cover its new card.
+   ============================================================================ */
+document.addEventListener("keydown", e => {
+  const mod = e.metaKey || e.ctrlKey;
+
+  // ⌘/Ctrl + Enter → Generate
+  if (mod && e.key === "Enter") {
+    e.preventDefault();
+    const active = document.querySelector('.tab-content.active');
+
+    if (active.id === 'sbi-content') {
+      if (document.activeElement.closest("#sbi-mtf-card")) generateSBIMTF();
+      else generateSBIEQ();
+    } else if (active.id === 'hdfc-content') {
+      if (document.activeElement.closest("#hdfc-sky-card")) generateHDFCSky();
+      else if (document.activeElement.closest("#hdfc-mtf-card")) generateHDFCMTF();
+      else generateHDFCIR();
+    }
+  }
+
+  // ⌘/Ctrl + Shift + C → Copy
+  if (mod && e.shiftKey && e.key.toLowerCase() === "c") {
+    e.preventDefault();
+    const active = document.querySelector('.tab-content.active');
+
+    if (active.id === 'sbi-content') {
+      if (document.activeElement.closest("#sbi-mtf-card")) copyToClipboard("sbiMtfOutput");
+      else copyToClipboard("sbiEqOutput");
+    } else if (active.id === 'hdfc-content') {
+      if (document.activeElement.closest("#hdfc-sky-card")) copyToClipboard("hdfc_skyOutput");
+      else if (document.activeElement.closest("#hdfc-mtf-card")) copyToClipboard("hdfc_mtfOutput");
+      else copyToClipboard("hdfc_irOutput");
+    }
+  }
+
+  // ⌘/Ctrl + J → Toggle theme
+  if (mod && e.key.toLowerCase() === "j") {
+    e.preventDefault();
+    toggleTheme();
+  }
+});
+</script>
+</body>
+</html>
