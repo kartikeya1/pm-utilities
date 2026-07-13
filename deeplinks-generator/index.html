@@ -519,6 +519,7 @@ textarea {
   <div class="tabs-container">
     <button class="tab-button active" onclick="switchTab('sbi', this)">SBI</button>
     <button class="tab-button" onclick="switchTab('hdfc', this)">HDFC</button>
+    <button class="tab-button" onclick="switchTab('axis', this)">Axis</button>
   </div>
 
   <!-- ============================================================
@@ -807,6 +808,100 @@ textarea {
           <button class="btn copy" onclick="copyToClipboard('hdfc_skyOutput')">Copy</button>
         </div>
         <textarea id="hdfc_skyOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       AXIS TAB
+       ============================================================ -->
+  <div id="axis-content" class="tab-content">
+    <div class="tab-intro">
+      Only <strong>Axis MTF</strong> baskets are supported today. Paste an MTF basket web URL to get
+      the <code>invest-preprod.axisdirect.in</code> SSO deep link — the path is always included, and any
+      query string after <code>?</code> is passed through as <code>params</code>. Normal (non-MTF) Axis
+      is not supported yet.
+    </div>
+
+    <!-- Axis Equity (normal) — NOT SUPPORTED YET.
+         No deep-link format has been defined for non-MTF Axis, so this card
+         intentionally has no generator logic: it only surfaces an error message.
+         When the real format is provided, replace generateAxisEQ() with the same
+         validate → split → assemble shape used by the other generators. -->
+    <div class="card" id="axis-eq-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-eq">Equity</span>
+          <h2>
+            <a href="https://www.axisdirect.in/" target="_blank" rel="noopener">
+              Axis Direct · smallcases
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="axis_eqInput">smallcase URL</label>
+        </div>
+        <input id="axis_eqInput" type="text"
+               placeholder="Not supported yet" disabled />
+        <p class="hint">Normal (non-MTF) Axis deep links aren't available yet — only
+          <strong>Axis MTF</strong> baskets are supported. Use the MTF card below.</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateAxisEQ()">Generate deep link</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('axis_eqOutput')">Copy</button>
+        </div>
+        <textarea id="axis_eqOutput" readonly placeholder="Normal Axis deep links are not supported yet."></textarea>
+      </div>
+    </div>
+
+    <!-- Axis MTF -->
+    <div class="card" id="axis-mtf-card">
+      <div class="card-head">
+        <div class="card-titles">
+          <span class="chip chip-mtf">MTF</span>
+          <h2>
+            <a href="https://mtfbaskets.axisdirect.in/" target="_blank" rel="noopener">
+              Axis Direct · MTF Baskets
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label-row">
+          <label for="axis_mtfInput">MTF basket URL</label>
+          <span id="axismtfBadge" class="badge"></span>
+        </div>
+        <input id="axis_mtfInput" type="text"
+               placeholder="https://mtfbaskets.axisdirect.in/smallcase/GOALMX_0019"
+               oninput="liveValidate(this,'https://mtfbaskets.axisdirect.in',axismtfBadge,axismtfErr)" />
+        <p class="hint">Must start with <code>mtfbaskets.axisdirect.in</code>. Works with a bare
+          <code>/smallcase/...</code> path, or with a full <code>?params</code> query string.</p>
+        <div id="axismtfErr" class="error-text">Invalid Axis MTF basket URL</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="generateAxisMTF()">Generate deep link</button>
+        <button class="btn ghost" onclick="loadAxisMTFSample()">Load sample</button>
+      </div>
+
+      <div class="output">
+        <div class="output-head">
+          <span class="output-title">Generated deep link</span>
+          <button class="btn copy" onclick="copyToClipboard('axis_mtfOutput')">Copy</button>
+        </div>
+        <textarea id="axis_mtfOutput" readonly placeholder="Your deep link will appear here after you click Generate."></textarea>
       </div>
     </div>
   </div>
@@ -1143,6 +1238,47 @@ function generateHDFCSky() {
   }
 }
 
+/* Axis Equity (normal, non-MTF) → NOT SUPPORTED YET.
+   No deep-link format exists for non-MTF Axis, so this deliberately generates
+   nothing and reports an error. Replace with real logic when the format lands. */
+function generateAxisEQ() {
+  axis_eqOutput.value =
+    "⚠️ Normal (non-MTF) Axis deep links are not supported yet — only Axis MTF baskets are available. Use the MTF card below.";
+  showToast("Normal Axis not supported — MTF only");
+}
+
+/* Axis MTF → invest-preprod.axisdirect.in SSO (sso_type=MISC).
+   The input domain is dropped; the remaining path (+ any #hash) is percent-
+   encoded into `path`. If the input has a query string after `?`, that whole
+   leftover string is percent-encoded and passed through as `params`. When there
+   is no query string, `params` is omitted entirely (path-only link). */
+function generateAxisMTF() {
+  const i = axis_mtfInput, o = axis_mtfOutput;
+  if (!validate(i, "https://mtfbaskets.axisdirect.in", axismtfBadge, axismtfErr)) {
+    showToast("Invalid Axis MTF URL");
+    return;
+  }
+
+  try {
+    const [b, p] = i.value.split("?");
+    const u = new URL(b);
+    const path = u.pathname + u.hash;
+
+    let out =
+      `https://invest-preprod.axisdirect.in/sso?sso_type=MISC` +
+      `&path=${encodeURIComponent(path)}`;
+    if (p) {
+      out += `&params=${encodeURIComponent(p)}`;
+    }
+    o.value = out;
+
+    showToast("Axis MTF deep link generated");
+  } catch {
+    o.value = "⚠️ Error generating link";
+    showToast("Error generating link");
+  }
+}
+
 /* ============================================================================
    4. SAMPLE DATA LOADERS
    Fill each field with a realistic example so the tool can be tried instantly.
@@ -1185,6 +1321,11 @@ function loadHDFCSkySample() {
   validate(document.getElementById('hdfc_skyInput'), 'https://invest.hdfcsky.com', hdfcskyBadge, hdfcskyErr);
 }
 
+function loadAxisMTFSample() {
+  document.getElementById('axis_mtfInput').value = 'https://mtfbaskets.axisdirect.in/smallcase/GOALMX_0019';
+  validate(document.getElementById('axis_mtfInput'), 'https://mtfbaskets.axisdirect.in', axismtfBadge, axismtfErr);
+}
+
 /* ============================================================================
    5. KEYBOARD SHORTCUTS
    Routes to the correct action based on the active tab and the card the focus
@@ -1206,6 +1347,9 @@ document.addEventListener("keydown", e => {
       if (document.activeElement.closest("#hdfc-sky-card")) generateHDFCSky();
       else if (document.activeElement.closest("#hdfc-mtf-card")) generateHDFCMTF();
       else generateHDFCIR();
+    } else if (active.id === 'axis-content') {
+      if (document.activeElement.closest("#axis-eq-card")) generateAxisEQ();
+      else generateAxisMTF();
     }
   }
 
@@ -1221,6 +1365,9 @@ document.addEventListener("keydown", e => {
       if (document.activeElement.closest("#hdfc-sky-card")) copyToClipboard("hdfc_skyOutput");
       else if (document.activeElement.closest("#hdfc-mtf-card")) copyToClipboard("hdfc_mtfOutput");
       else copyToClipboard("hdfc_irOutput");
+    } else if (active.id === 'axis-content') {
+      if (document.activeElement.closest("#axis-eq-card")) copyToClipboard("axis_eqOutput");
+      else copyToClipboard("axis_mtfOutput");
     }
   }
 
