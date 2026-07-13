@@ -19,12 +19,14 @@
 
 A single-file web tool that converts a broker's **smallcase web URL** into a
 **ready-to-use in-app deep link**. It currently supports **SBI Securities**
-(Equity, MTF) and **HDFC** (IR, MTF, HDFC Sky).
+(Equity, MTF), **HDFC** (IR, MTF, HDFC Sky) and **Axis** (Equity, MTF).
 
 > **This README is written for the next engineer or AI who edits this tool.**
-> The most likely next task is **adding a new broker (e.g. Axis / Axis MTF)** —
-> there is a complete step-by-step recipe for that below. Read the
-> "Golden rules" section first; it will save you from breaking things.
+> The most likely next task is **adding a new broker** — there is a complete
+> step-by-step recipe for that below (§6), written around Axis as the example.
+> Axis has since been implemented, so §6 doubles as a worked reference: compare
+> it against the `generateAxisEQ` / `generateAxisMTF` functions in the code.
+> Read the "Golden rules" section first; it will save you from breaking things.
 
 ---
 
@@ -70,6 +72,14 @@ domain string in step 1.
 | HDFC IR   | `sso_key=IR_SMALLCASE`               | **JSON → `encodeURIComponent`** into `extra_param` |
 | HDFC MTF  | `sso_key=IR_MTF_BASKET_SMALLCASE`    | **JSON → `encodeURIComponent`** into `extra_param` |
 | HDFC Sky  | `hdfcsky.com/sky/hdfc-small-case`    | plain `encodeURIComponent` |
+| Axis EQ   | `invest-preprod.axisdirect.in/sso?sso_type=EQUITY_SMALLCASE` | plain `encodeURIComponent` of path; `?query` passed through as `params` |
+| Axis MTF  | `invest-preprod.axisdirect.in/sso?sso_type=MISC`             | plain `encodeURIComponent` of path; `?query` passed through as `params` |
+
+Axis drops the input domain, percent-encodes the remaining `pathname + hash`
+into `path`, and (only when the input has a `?` query) percent-encodes the whole
+leftover query string into `params`. Equity and MTF differ **only** in the
+`sso_type` value (`EQUITY_SMALLCASE` vs `MISC`) and the validated input domain
+(`axisdirect.smallcase.com` vs `mtfbaskets.axisdirect.in`).
 
 The HDFC IR/MTF `extra_param` JSON has this exact shape:
 
@@ -95,7 +105,8 @@ The file has three parts: `<style>`, the `<body>` markup, and the `<script>`.
 2. **VALIDATION GATE** — `validate()` (the strict prefix check that gates
    generation) + `base64Encode()`.
 3. **GENERATORS** — `generateSBIEQ`, `generateSBIMTF`, `generateHDFCIR`,
-   `generateHDFCMTF`, `generateHDFCSky`. **← business logic, do not edit output.**
+   `generateHDFCMTF`, `generateHDFCSky`, `generateAxisEQ`, `generateAxisMTF`.
+   **← business logic, do not edit output.**
 4. **SAMPLE LOADERS** — `loadXXXSample()` fill demo data.
 5. **KEYBOARD SHORTCUTS** — routes ⌘/Ctrl+Enter (generate), ⌘/Ctrl+Shift+C
    (copy), ⌘/Ctrl+J (theme) based on the active tab + focused card.

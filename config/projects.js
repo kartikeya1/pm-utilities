@@ -16,7 +16,7 @@ window.PROJECTS = [
   {
     slug: "deeplinks-generator",
     title: "smallcase Deep Links Generator",
-    tagline: "Converts a broker's smallcase web URL into a ready-to-use in-app deep link. Supports SBI Securities (Equity, MTF) and HDFC (IR, MTF, HDFC Sky).",
-    tags: ["Deep Links", "SBI", "HDFC"]
+    tagline: "Converts a broker's smallcase web URL into a ready-to-use in-app deep link. Supports SBI Securities (Equity, MTF), HDFC (IR, MTF, HDFC Sky) and Axis (Equity, MTF).",
+    tags: ["Deep Links", "SBI", "HDFC", "Axis"]
   }
 ];
