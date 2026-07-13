@@ -11,7 +11,7 @@ own route.
 | Route | Tool | What it is |
 |-------|------|------------|
 | [`/sbi-recon-evolution`](sbi-recon-evolution/) | **SBI Reconciliation Tool — Evolution** | CSV combining + reconciliation in the browser via Pyodide (pandas), shown in two design iterations. |
-| [`/deeplinks-generator`](deeplinks-generator/) | **smallcase Deep Links Generator** | Converts a broker's smallcase web URL into a ready-to-use in-app deep link (SBI, HDFC). |
+| [`/deeplinks-generator`](deeplinks-generator/) | **smallcase Deep Links Generator** | Converts a broker's smallcase web URL into a ready-to-use in-app deep link (SBI, HDFC, Axis). |
 
 <br>
 
@@ -77,7 +77,8 @@ Originally built for internal use at Smallcase; the evolution story is intention
 ## smallcase Deep Links Generator
 
 A single-file web tool that converts a broker's **smallcase web URL** into a **ready-to-use in-app
-deep link**. It supports **SBI Securities** (Equity, MTF) and **HDFC** (IR, MTF, HDFC Sky).
+deep link**. It supports **SBI Securities** (Equity, MTF), **HDFC** (IR, MTF, HDFC Sky) and
+**Axis** (Equity, MTF).
 
 Every broker follows the same 3-step shape: **validate** the pasted URL starts with the expected
 domain → **split** the URL into base + query and derive the path → **assemble** the broker-specific
@@ -92,6 +93,8 @@ deep-link string (for HDFC IR/MTF, embedding UTM fields into a JSON `extra_param
 | HDFC IR   | `sso_key=IR_SMALLCASE`               | **JSON → `encodeURIComponent`** into `extra_param` |
 | HDFC MTF  | `sso_key=IR_MTF_BASKET_SMALLCASE`    | **JSON → `encodeURIComponent`** into `extra_param` |
 | HDFC Sky  | `hdfcsky.com/sky/hdfc-small-case`    | plain `encodeURIComponent` |
+| Axis EQ   | `sso_type=EQUITY_SMALLCASE`          | plain `encodeURIComponent` of path/params |
+| Axis MTF  | `sso_type=MISC`                      | plain `encodeURIComponent` of path/params |
 
 > ⚠️ **The link-generation business logic is verified correct in production — do not change what
 > any `generate*()` function outputs.** Restyle freely; never touch the output format. The full
