@@ -17,7 +17,7 @@
 
 # Equity Portfolios and Basket Investing Deep Links Generator
 
-A single-file web tool that converts a broker's **Equity Portfolios and Basket Investing web URL** into a
+A single-file web tool that converts a broker's **basket web URL** into a
 **ready-to-use in-app deep link**. It currently supports **SBI Securities**
 (Equity, MTF), **HDFC** (IR, MTF, HDFC Sky) and **Axis** (Equity, MTF).
 
@@ -190,7 +190,7 @@ as the template if Axis has no UTMs, or the **HDFC IR card** if it does.
 Minimum for one Axis product (key = `axis`):
 ```html
 <div id="axis-content" class="tab-content">
-  <div class="tab-intro">Paste an <strong>Axis</strong> Equity Portfolios and Basket Investing web URL…</div>
+  <div class="tab-intro">Paste an <strong>Axis</strong> basket web URL…</div>
 
   <div class="card" id="axis-eq-card">
     <div class="card-head">
@@ -201,14 +201,14 @@ Minimum for one Axis product (key = `axis`):
     </div>
     <div class="field">
       <div class="field-label-row">
-        <label for="axisInput">Equity Portfolios and Basket Investing URL</label>
+        <label for="axisInput">Basket URL</label>
         <span id="axisBadge" class="badge"></span>
       </div>
       <input id="axisInput" type="text"
              placeholder="https://SMALLCASE_WEB_DOMAIN/smallcase/AXIS_0001"
              oninput="liveValidate(this,'https://SMALLCASE_WEB_DOMAIN',axisBadge,axisErr)" />
       <p class="hint">Must start with <code>SMALLCASE_WEB_DOMAIN</code></p>
-      <div id="axisErr" class="error-text">Invalid Axis Equity Portfolios and Basket Investing URL</div>
+      <div id="axisErr" class="error-text">Invalid Axis Basket URL</div>
     </div>
     <div class="actions">
       <button class="btn primary" onclick="generateAxis()">Generate deep link</button>

@@ -506,7 +506,7 @@ textarea {
   <header>
     <div class="title-block">
       <h1>Equity Portfolios and Basket Investing Deep Links Generator</h1>
-      <p>Convert a broker's Equity Portfolios and Basket Investing web URL into a ready-to-use in-app deep link.</p>
+      <p>Convert a broker's basket web URL into a ready-to-use in-app deep link.</p>
     </div>
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark / light theme">
       <span id="themeIcon">🌙</span><span id="themeLabel">Dark</span>
@@ -526,7 +526,7 @@ textarea {
        ============================================================ -->
   <div id="sbi-content" class="tab-content active">
     <div class="tab-intro">
-      Paste an <strong>SBI Securities</strong> Equity Portfolios and Basket Investing web URL below and hit Generate to get the
+      Paste an <strong>SBI Securities</strong> basket web URL below and hit Generate to get the
       <code>mobile.sbisecurities.in</code> app deep link.
     </div>
 
@@ -546,14 +546,14 @@ textarea {
 
       <div class="field">
         <div class="field-label-row">
-          <label for="sbiEqInput">Equity Portfolios and Basket Investing URL</label>
+          <label for="sbiEqInput">Basket URL</label>
           <span id="sbieqBadge" class="badge"></span>
         </div>
         <input id="sbiEqInput" type="text"
                placeholder="https://smallcases.sbisecurities.in/smallcase/SBITR_0001"
                oninput="liveValidate(this,'https://smallcases.sbisecurities.in',sbieqBadge,sbieqErr)" />
         <p class="hint">Must start with <code>smallcases.sbisecurities.in</code></p>
-        <div id="sbieqErr" class="error-text">Invalid Equity Portfolios and Basket Investing URL</div>
+        <div id="sbieqErr" class="error-text">Invalid Basket URL</div>
       </div>
 
       <div class="actions">
@@ -616,7 +616,7 @@ textarea {
        ============================================================ -->
   <div id="hdfc-content" class="tab-content">
     <div class="tab-intro">
-      Paste an <strong>HDFC</strong> Equity Portfolios and Basket Investing web URL below. IR &amp; MTF links support optional
+      Paste an <strong>HDFC</strong> basket web URL below. IR &amp; MTF links support optional
       <strong>UTM parameters</strong>, which are bundled into the <code>extra_param</code> JSON payload.
     </div>
 
@@ -636,14 +636,14 @@ textarea {
 
       <div class="field">
         <div class="field-label-row">
-          <label for="hdfc_irInput">Equity Portfolios and Basket Investing URL</label>
+          <label for="hdfc_irInput">Basket URL</label>
           <span id="hdfcirBadge" class="badge"></span>
         </div>
         <input id="hdfc_irInput" type="text"
                placeholder="https://basketinvesting.hdfcsec.com/smallcase/HDNM_0014"
                oninput="liveValidate(this,'https://basketinvesting.hdfcsec.com',hdfcirBadge,hdfcirErr)" />
         <p class="hint">Must start with <code>basketinvesting.hdfcsec.com</code></p>
-        <div id="hdfcirErr" class="error-text">Invalid IR Equity Portfolios and Basket Investing URL</div>
+        <div id="hdfcirErr" class="error-text">Invalid IR Basket URL</div>
       </div>
 
       <!-- UTM block — values are read by generateHDFCIR() and bundled into extra_param JSON -->
@@ -786,14 +786,14 @@ textarea {
 
       <div class="field">
         <div class="field-label-row">
-          <label for="hdfc_skyInput">Equity Portfolios and Basket Investing URL</label>
+          <label for="hdfc_skyInput">Basket URL</label>
           <span id="hdfcskyBadge" class="badge"></span>
         </div>
         <input id="hdfc_skyInput" type="text"
                placeholder="https://invest.hdfcsky.com/smallcase/HDFCTR_0001"
                oninput="liveValidate(this,'https://invest.hdfcsky.com',hdfcskyBadge,hdfcskyErr)" />
         <p class="hint">Must start with <code>invest.hdfcsky.com</code></p>
-        <div id="hdfcskyErr" class="error-text">Invalid HDFC Sky Equity Portfolios and Basket Investing URL</div>
+        <div id="hdfcskyErr" class="error-text">Invalid HDFC Sky Basket URL</div>
       </div>
 
       <div class="actions">

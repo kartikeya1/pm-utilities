@@ -16,7 +16,7 @@ window.PROJECTS = [
   {
     slug: "deeplinks-generator",
     title: "Equity Portfolios and Basket Investing Deep Links Generator",
-    tagline: "Converts a broker's Equity Portfolios and Basket Investing web URL into a ready-to-use in-app deep link. Supports SBI Securities (Equity, MTF), HDFC (IR, MTF, HDFC Sky) and Axis (Equity, MTF).",
+    tagline: "Converts a broker's basket web URL into a ready-to-use in-app deep link. Supports SBI Securities (Equity, MTF), HDFC (IR, MTF, HDFC Sky) and Axis (Equity, MTF).",
     tags: ["Deep Links", "SBI", "HDFC", "Axis"]
   }
 ];
