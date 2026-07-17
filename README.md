@@ -96,11 +96,20 @@ deep-link string (for HDFC IR/MTF, embedding UTM fields into a JSON `extra_param
 | Axis EQ   | `sso_type=EQUITY_SMALLCASE`          | plain `encodeURIComponent` of path/params |
 | Axis MTF  | `sso_type=MISC`                      | plain `encodeURIComponent` of path/params |
 
+> 🔒 **Why some values still say `SMALLCASE` / `small-case`.** The tokens above
+> (`IR_SMALLCASE`, `IR_MTF_BASKET_SMALLCASE`, `EQUITY_SMALLCASE`, `hdfc-small-case`), the broker
+> domains, and the `/smallcase/` URL path are **broker-owned identifiers** — they are the literal
+> strings the brokers' SSO endpoints expect. They are intentionally left unchanged and are **not**
+> part of this repo's product naming. Renaming any of them breaks link generation. Only human-facing
+> display text was rebranded to "Equity Portfolios and Basket Investing".
+
 > ⚠️ **The link-generation business logic is verified correct in production — do not change what
-> any `generate*()` function outputs.** Restyle freely; never touch the output format. The full
-> engineering guide, ID naming convention, and a step-by-step **recipe for adding a new broker**
-> live in [`deeplinks-generator/ENGINEERING.md`](deeplinks-generator/ENGINEERING.md). Read its
-> "Golden rules" before editing. Reference/legacy HTMLs are preserved under
+> any `generate*()` function outputs.** Restyle freely; never touch the output format. This includes
+> never renaming the broker identifiers or `/smallcase/` paths inside any URL, `sso_key`, or
+> `sso_type` — a find-and-replace on "smallcase" must skip them. The full engineering guide, ID
+> naming convention, and a step-by-step **recipe for adding a new broker** live in
+> [`deeplinks-generator/ENGINEERING.md`](deeplinks-generator/ENGINEERING.md). Read its "Golden
+> rules" before editing. Reference/legacy HTMLs are preserved under
 > [`deeplinks-generator/reference/`](deeplinks-generator/reference/).
 
 <br>

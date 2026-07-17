@@ -46,6 +46,15 @@ A single-file web tool that converts a broker's **Equity Portfolios and Basket I
    drift apart, the deployed site won't match what you edited.
 4. **Keep it a single self-contained file.** No external CSS/JS/fonts/images —
    everything is inlined so it works offline and on any static host.
+5. **Never rename broker identifiers when rebranding display text.** The word
+   `smallcase` (and `small-case`) survives on purpose inside broker-owned strings:
+   domains (`smallcases.sbisecurities.in`, `axisdirect.smallcase.com`), the
+   `/smallcase/` URL path, and SSO tokens (`IR_SMALLCASE`,
+   `IR_MTF_BASKET_SMALLCASE`, `EQUITY_SMALLCASE`, `hdfc-small-case`). These are the
+   literal values the brokers' endpoints expect. Product display text was
+   rebranded to "Equity Portfolios and Basket Investing"; a blind
+   find-and-replace on "smallcase" **will break link generation** — always mask
+   URLs, `sso_key`/`sso_type` values, and paths first.
 
 ---
 
