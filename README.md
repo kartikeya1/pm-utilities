@@ -11,7 +11,7 @@ own route.
 | Route | Tool | What it is |
 |-------|------|------------|
 | [`/sbi-recon-evolution`](sbi-recon-evolution/) | **SBI Reconciliation Tool — Evolution** | CSV combining + reconciliation in the browser via Pyodide (pandas), shown in two design iterations. |
-| [`/deeplinks-generator`](deeplinks-generator/) | **smallcase Deep Links Generator** | Converts a broker's smallcase web URL into a ready-to-use in-app deep link (SBI, HDFC, Axis). |
+| [`/deeplinks-generator`](deeplinks-generator/) | **Equity Portfolios and Basket Investing Deep Links Generator** | Converts a broker's Equity Portfolios and Basket Investing web URL into a ready-to-use in-app deep link (SBI, HDFC, Axis). |
 
 <br>
 
@@ -35,7 +35,7 @@ interactive experience.
 
 **Reconciliation** — upload two fixed-format CSV files (Combined CS + Athena File); automatic
 reconciliation with pandas; generates **6 output reports** (Matching Unique Keys Summary, Missing in
-Smallcase, Missing in SSL, Date Mismatches, Quantity Mismatches, Turnover Mismatches); download all
+Equity Portfolios and Basket Investing, Missing in SSL, Date Mismatches, Quantity Mismatches, Turnover Mismatches); download all
 results as a ZIP.
 
 ### Architecture & design system
@@ -61,7 +61,7 @@ frontend judgment (two versions show that **utility ≠ UX**), technical breadth
 CSV/ZIP handling, browser APIs), accessibility (ARIA labels, focus management, keyboard support,
 contrast), and polish (feedback loops, error handling, logging).
 
-Originally built for internal use at Smallcase; the evolution story is intentionally preserved.
+Originally built for internal use at Equity Portfolios and Basket Investing; the evolution story is intentionally preserved.
 
 ### Future enhancements
 
@@ -74,9 +74,9 @@ Originally built for internal use at Smallcase; the evolution story is intention
 
 <br>
 
-## smallcase Deep Links Generator
+## Equity Portfolios and Basket Investing Deep Links Generator
 
-A single-file web tool that converts a broker's **smallcase web URL** into a **ready-to-use in-app
+A single-file web tool that converts a broker's **Equity Portfolios and Basket Investing web URL** into a **ready-to-use in-app
 deep link**. It supports **SBI Securities** (Equity, MTF), **HDFC** (IR, MTF, HDFC Sky) and
 **Axis** (Equity, MTF).
 

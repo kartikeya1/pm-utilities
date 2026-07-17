@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>smallcase Deep Links Generator</title>
+<title>Equity Portfolios and Basket Investing Deep Links Generator</title>
 
 <!-- Inline SVG favicon (a link/chain glyph). Kept inline so the page stays
      fully self-contained — no external asset requests (works offline / on any host). -->
@@ -505,8 +505,8 @@ textarea {
   <!-- ============================ HEADER ============================ -->
   <header>
     <div class="title-block">
-      <h1>smallcase Deep Links Generator</h1>
-      <p>Convert a broker's smallcase web URL into a ready-to-use in-app deep link.</p>
+      <h1>Equity Portfolios and Basket Investing Deep Links Generator</h1>
+      <p>Convert a broker's Equity Portfolios and Basket Investing web URL into a ready-to-use in-app deep link.</p>
     </div>
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark / light theme">
       <span id="themeIcon">🌙</span><span id="themeLabel">Dark</span>
@@ -526,7 +526,7 @@ textarea {
        ============================================================ -->
   <div id="sbi-content" class="tab-content active">
     <div class="tab-intro">
-      Paste an <strong>SBI Securities</strong> smallcase web URL below and hit Generate to get the
+      Paste an <strong>SBI Securities</strong> Equity Portfolios and Basket Investing web URL below and hit Generate to get the
       <code>mobile.sbisecurities.in</code> app deep link.
     </div>
 
@@ -537,7 +537,7 @@ textarea {
           <span class="chip chip-eq">Equity</span>
           <h2>
             <a href="https://smallcases.sbisecurities.in/" target="_blank" rel="noopener">
-              SBI Securities · Equity smallcases
+              SBI Securities · Equity Portfolios and Basket Investing
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </h2>
@@ -546,14 +546,14 @@ textarea {
 
       <div class="field">
         <div class="field-label-row">
-          <label for="sbiEqInput">smallcase URL</label>
+          <label for="sbiEqInput">Equity Portfolios and Basket Investing URL</label>
           <span id="sbieqBadge" class="badge"></span>
         </div>
         <input id="sbiEqInput" type="text"
                placeholder="https://smallcases.sbisecurities.in/smallcase/SBITR_0001"
                oninput="liveValidate(this,'https://smallcases.sbisecurities.in',sbieqBadge,sbieqErr)" />
         <p class="hint">Must start with <code>smallcases.sbisecurities.in</code></p>
-        <div id="sbieqErr" class="error-text">Invalid Equity smallcase URL</div>
+        <div id="sbieqErr" class="error-text">Invalid Equity Portfolios and Basket Investing URL</div>
       </div>
 
       <div class="actions">
@@ -616,7 +616,7 @@ textarea {
        ============================================================ -->
   <div id="hdfc-content" class="tab-content">
     <div class="tab-intro">
-      Paste an <strong>HDFC</strong> smallcase web URL below. IR &amp; MTF links support optional
+      Paste an <strong>HDFC</strong> Equity Portfolios and Basket Investing web URL below. IR &amp; MTF links support optional
       <strong>UTM parameters</strong>, which are bundled into the <code>extra_param</code> JSON payload.
     </div>
 
@@ -627,7 +627,7 @@ textarea {
           <span class="chip chip-eq">Invest Right</span>
           <h2>
             <a href="https://basketinvesting.hdfcsec.com/" target="_blank" rel="noopener">
-              HDFC Securities · IR smallcases
+              HDFC Securities · IR Equity Portfolios and Basket Investing
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </h2>
@@ -636,14 +636,14 @@ textarea {
 
       <div class="field">
         <div class="field-label-row">
-          <label for="hdfc_irInput">smallcase URL</label>
+          <label for="hdfc_irInput">Equity Portfolios and Basket Investing URL</label>
           <span id="hdfcirBadge" class="badge"></span>
         </div>
         <input id="hdfc_irInput" type="text"
                placeholder="https://basketinvesting.hdfcsec.com/smallcase/HDNM_0014"
                oninput="liveValidate(this,'https://basketinvesting.hdfcsec.com',hdfcirBadge,hdfcirErr)" />
         <p class="hint">Must start with <code>basketinvesting.hdfcsec.com</code></p>
-        <div id="hdfcirErr" class="error-text">Invalid IR smallcase URL</div>
+        <div id="hdfcirErr" class="error-text">Invalid IR Equity Portfolios and Basket Investing URL</div>
       </div>
 
       <!-- UTM block — values are read by generateHDFCIR() and bundled into extra_param JSON -->
@@ -777,7 +777,7 @@ textarea {
           <span class="chip chip-sky">Sky</span>
           <h2>
             <a href="https://invest.hdfcsky.com/" target="_blank" rel="noopener">
-              HDFC Sky · smallcases
+              HDFC Sky · Equity Portfolios and Basket Investing
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
           </h2>
@@ -786,14 +786,14 @@ textarea {
 
       <div class="field">
         <div class="field-label-row">
-          <label for="hdfc_skyInput">smallcase URL</label>
+          <label for="hdfc_skyInput">Equity Portfolios and Basket Investing URL</label>
           <span id="hdfcskyBadge" class="badge"></span>
         </div>
         <input id="hdfc_skyInput" type="text"
                placeholder="https://invest.hdfcsky.com/smallcase/HDFCTR_0001"
                oninput="liveValidate(this,'https://invest.hdfcsky.com',hdfcskyBadge,hdfcskyErr)" />
         <p class="hint">Must start with <code>invest.hdfcsky.com</code></p>
-        <div id="hdfcskyErr" class="error-text">Invalid HDFC Sky smallcase URL</div>
+        <div id="hdfcskyErr" class="error-text">Invalid HDFC Sky Equity Portfolios and Basket Investing URL</div>
       </div>
 
       <div class="actions">
@@ -825,7 +825,7 @@ textarea {
 
 <script>
 /* ============================================================================
-   smallcase Deep Links Generator — application script
+   Equity Portfolios and Basket Investing Deep Links Generator — application script
    ----------------------------------------------------------------------------
    HOW THIS FILE IS ORGANISED (please read README.md before editing):
 
