@@ -531,8 +531,8 @@ with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
           <div id="v1-turnoverMismatchSample"></div>
         </details>
         <details>
-          <summary>Missing in Smallcase (sample rows)</summary>
-          <div id="v1-missSmallcaseSample"></div>
+          <summary>Missing in Equity Portfolios and Basket Investing (sample rows)</summary>
+          <div id="v1-missBasketSample"></div>
         </details>
         <details>
           <summary>Missing in SSL (sample rows)</summary>
@@ -550,7 +550,7 @@ with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
           The ZIP includes:
           <ul>
             <li>MatchingUniqueKeysSummary.csv</li>
-            <li>Missing in smallcase.csv</li>
+            <li>Missing in Equity Portfolios and Basket Investing.csv</li>
             <li>Missing in SSL.csv</li>
             <li>Date Mismatch.csv</li>
             <li>Quantity Mismatch.csv</li>
@@ -723,7 +723,7 @@ turnovermismatchdf = pd.DataFrame({
     "TurnoverFile2": pd.Series(turnoverfile2.loc[commonindex].round(2).values)[turnovermismatchmask].values,
 })
 
-missinginsmallcase = df1[df1UniqueKey.isin(file1onlykeys)].copy()
+missingInBasketFile = df1[df1UniqueKey.isin(file1onlykeys)].copy()
 missinginssl = df2[df2UniqueKey.isin(file2onlykeys)].copy()
 
 internaluserids = [
@@ -732,14 +732,14 @@ internaluserids = [
     1002081991, 1000655146, 22704829, 1003521079, 1004247041, 1002954678,
     1004874580, 1001425925, 4000011844, 1004247041
 ]
-missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
+missingInBasketFile["InternalUser"] = missingInBasketFile.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
 
 def df_to_csv_str(df):
     return df.to_csv(index=False)
 
 outputs = {
     "MatchingUniqueKeysSummary.csv": df_to_csv_str(matchingsummarydf),
-    "Missing in smallcase.csv": df_to_csv_str(missinginsmallcase),
+    "Missing in Equity Portfolios and Basket Investing.csv": df_to_csv_str(missingInBasketFile),
     "Missing in SSL.csv": df_to_csv_str(missinginssl),
     "Date Mismatch.csv": df_to_csv_str(datemismatchdf),
     "Quantity Mismatch.csv": df_to_csv_str(quantitymismatchdf),
@@ -748,7 +748,7 @@ outputs = {
 
 summary_counts = {
     "Matching Unique Keys": len(matchingsummarydf),
-    "Missing in Smallcase": len(missinginsmallcase),
+    "Missing in Equity Portfolios and Basket Investing": len(missingInBasketFile),
     "Missing in SSL": len(missinginssl),
     "Date Mismatches": len(datemismatchdf),
     "Quantity Mismatches": len(quantitymismatchdf),
@@ -762,7 +762,7 @@ result = {
         "Date Mismatch.csv": outputs["Date Mismatch.csv"].splitlines()[:21],
         "Quantity Mismatch.csv": outputs["Quantity Mismatch.csv"].splitlines()[:21],
         "Turnover Mismatch.csv": outputs["Turnover Mismatch.csv"].splitlines()[:21],
-        "Missing in smallcase.csv": outputs["Missing in smallcase.csv"].splitlines()[:21],
+        "Missing in Equity Portfolios and Basket Investing.csv": outputs["Missing in Equity Portfolios and Basket Investing.csv"].splitlines()[:21],
         "Missing in SSL.csv": outputs["Missing in SSL.csv"].splitlines()[:21],
     }
 }
@@ -779,7 +779,7 @@ json.dumps(result)
           const s = res.counts;
           document.getElementById("v1-summary").innerHTML = `
             <div class="v1-row"><span class="v1-pill">Matching: ${s["Matching Unique Keys"]}</span>
-            <span class="v1-pill">Missing in Smallcase: ${s["Missing in Smallcase"]}</span>
+            <span class="v1-pill">Missing in Equity Portfolios and Basket Investing: ${s["Missing in Equity Portfolios and Basket Investing"]}</span>
             <span class="v1-pill">Missing in SSL: ${s["Missing in SSL"]}</span>
             <span class="v1-pill">Date mismatches: ${s["Date Mismatches"]}</span>
             <span class="v1-pill">Qty mismatches: ${s["Quantity Mismatches"]}</span>
@@ -792,7 +792,7 @@ json.dumps(result)
           document.getElementById("v1-dateMismatchSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Date Mismatch.csv"]));
           document.getElementById("v1-qtyMismatchSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Quantity Mismatch.csv"]));
           document.getElementById("v1-turnoverMismatchSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Turnover Mismatch.csv"]));
-          document.getElementById("v1-missSmallcaseSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Missing in smallcase.csv"]));
+          document.getElementById("v1-missBasketSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Missing in Equity Portfolios and Basket Investing.csv"]));
           document.getElementById("v1-missSSLSample").innerHTML = v1_toHtmlTableFromCSV(linesToCSV(res.samples["Missing in SSL.csv"]));
 
           const zipBytesBase64 = await pyodide.runPythonAsync(`
@@ -942,7 +942,7 @@ b64
               The ZIP includes:
               <ul>
                 <li>MatchingUniqueKeysSummary.csv</li>
-                <li>Missing in smallcase.csv</li>
+                <li>Missing in Equity Portfolios and Basket Investing.csv</li>
                 <li>Missing in SSL.csv</li>
                 <li>Date Mismatch.csv</li>
                 <li>Quantity Mismatch.csv</li>
@@ -972,8 +972,8 @@ b64
             <div id="v2-turnoverMismatchSample"></div>
           </details>
           <details>
-            <summary>Missing in Smallcase (sample rows)</summary>
-            <div id="v2-missSmallcaseSample"></div>
+            <summary>Missing in Equity Portfolios and Basket Investing (sample rows)</summary>
+            <div id="v2-missBasketSample"></div>
           </details>
           <details>
             <summary>Missing in SSL (sample rows)</summary>
@@ -1505,7 +1505,7 @@ turnovermismatchdf = pd.DataFrame({
     "TurnoverFile2": pd.Series(turnoverfile2.loc[commonindex].round(2).values)[turnovermismatchmask].values,
 })
 
-missinginsmallcase = df1[df1UniqueKey.isin(file1onlykeys)].copy()
+missingInBasketFile = df1[df1UniqueKey.isin(file1onlykeys)].copy()
 missinginssl = df2[df2UniqueKey.isin(file2onlykeys)].copy()
 
 internaluserids = [
@@ -1514,14 +1514,14 @@ internaluserids = [
     1002081991, 1000655146, 22704829, 1003521079, 1004247041, 1002954678,
     1004874580, 1001425925, 4000011844
 ]
-missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
+missingInBasketFile["InternalUser"] = missingInBasketFile.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
 
 def df_to_csv_str(df):
     return df.to_csv(index=False)
 
 outputs = {
     "MatchingUniqueKeysSummary.csv": df_to_csv_str(matchingsummarydf),
-    "Missing in smallcase.csv": df_to_csv_str(missinginsmallcase),
+    "Missing in Equity Portfolios and Basket Investing.csv": df_to_csv_str(missingInBasketFile),
     "Missing in SSL.csv": df_to_csv_str(missinginssl),
     "Date Mismatch.csv": df_to_csv_str(datemismatchdf),
     "Quantity Mismatch.csv": df_to_csv_str(quantitymismatchdf),
@@ -1530,7 +1530,7 @@ outputs = {
 
 summary_counts = {
     "Matching Unique Keys": len(matchingsummarydf),
-    "Missing in Smallcase": len(missinginsmallcase),
+    "Missing in Equity Portfolios and Basket Investing": len(missingInBasketFile),
     "Missing in SSL": len(missinginssl),
     "Date Mismatches": len(datemismatchdf),
     "Quantity Mismatches": len(quantitymismatchdf),
@@ -1544,7 +1544,7 @@ result = {
         "Date Mismatch.csv": outputs["Date Mismatch.csv"].splitlines()[:21],
         "Quantity Mismatch.csv": outputs["Quantity Mismatch.csv"].splitlines()[:21],
         "Turnover Mismatch.csv": outputs["Turnover Mismatch.csv"].splitlines()[:21],
-        "Missing in smallcase.csv": outputs["Missing in smallcase.csv"].splitlines()[:21],
+        "Missing in Equity Portfolios and Basket Investing.csv": outputs["Missing in Equity Portfolios and Basket Investing.csv"].splitlines()[:21],
         "Missing in SSL.csv": outputs["Missing in SSL.csv"].splitlines()[:21],
     }
 }
@@ -1562,7 +1562,7 @@ json.dumps(result)
           const s = res.counts || {};
           const summaryItems = [
             { label: "Matching Unique Keys", value: s["Matching Unique Keys"] || 0, tone: "success" },
-            { label: "Missing in Smallcase", value: s["Missing in Smallcase"] || 0, tone: "warn" },
+            { label: "Missing in Equity Portfolios and Basket Investing", value: s["Missing in Equity Portfolios and Basket Investing"] || 0, tone: "warn" },
             { label: "Missing in SSL", value: s["Missing in SSL"] || 0, tone: "warn" },
             { label: "Date Mismatches", value: s["Date Mismatches"] || 0, tone: "warn" },
             { label: "Quantity Mismatches", value: s["Quantity Mismatches"] || 0, tone: "warn" },
@@ -1595,7 +1595,7 @@ json.dumps(result)
           document.getElementById("v2-dateMismatchSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Date Mismatch.csv"]));
           document.getElementById("v2-qtyMismatchSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Quantity Mismatch.csv"]));
           document.getElementById("v2-turnoverMismatchSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Turnover Mismatch.csv"]));
-          document.getElementById("v2-missSmallcaseSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Missing in smallcase.csv"]));
+          document.getElementById("v2-missBasketSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Missing in Equity Portfolios and Basket Investing.csv"]));
           document.getElementById("v2-missSSLSample").innerHTML = v2_toHtmlTableFromCSV(linesToCSV(samples["Missing in SSL.csv"]));
 
           const zipBytesBase64 = await pyodide.runPythonAsync(`
