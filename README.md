@@ -1,8 +1,25 @@
 # 🧮 Product Management — Utilities
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Build: none](https://img.shields.io/badge/build-none-brightgreen)
+![Deploy: Vercel](https://img.shields.io/badge/deploy-Vercel-black?logo=vercel)
+
 A portfolio of internal **Product Management** tools and utilities, served as a single Vercel site.
 The home page is a directory of tools; each card opens a self-contained, zero-build web app at its
 own route.
+
+<br>
+
+## Contents
+
+- [Projects](#projects)
+- [SBI Reconciliation Tool — Evolution](#sbi-reconciliation-tool--evolution)
+- [Equity Portfolios and Basket Investing Deep Links Generator](#equity-portfolios-and-basket-investing-deep-links-generator)
+- [Architecture](#architecture)
+- [Development](#development)
+- [Adding a future utility](#adding-a-future-utility)
+- [Deployment (Vercel)](#deployment-vercel)
+- [Tech](#tech)
 
 <br>
 
@@ -11,7 +28,7 @@ own route.
 | Route | Tool | What it is |
 |-------|------|------------|
 | [`/sbi-recon-evolution`](sbi-recon-evolution/) | **SBI Reconciliation Tool — Evolution** | CSV combining + reconciliation in the browser via Pyodide (pandas), shown in two design iterations. |
-| [`/deeplinks-generator`](deeplinks-generator/) | **Equity Portfolios and Basket Investing Deep Links Generator** | Converts a broker's Equity Portfolios and Basket Investing web URL into a ready-to-use in-app deep link (SBI, HDFC, Axis). |
+| [`/deeplinks-generator`](deeplinks-generator/) | **Equity Portfolios and Basket Investing Deep Links Generator** | Converts a broker's basket web URL into a ready-to-use in-app deep link (SBI, HDFC, Axis). |
 
 <br>
 
@@ -76,7 +93,7 @@ Originally built for internal use at Equity Portfolios and Basket Investing; the
 
 ## Equity Portfolios and Basket Investing Deep Links Generator
 
-A single-file web tool that converts a broker's **Equity Portfolios and Basket Investing web URL** into a **ready-to-use in-app
+A single-file web tool that converts a broker's **basket web URL** into a **ready-to-use in-app
 deep link**. It supports **SBI Securities** (Equity, MTF), **HDFC** (IR, MTF, HDFC Sky) and
 **Axis** (Equity, MTF).
 
