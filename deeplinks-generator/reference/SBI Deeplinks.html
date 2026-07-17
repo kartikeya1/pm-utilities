@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SBI Securities – smallcase Deep Link Generator</title>
+<title>SBI Securities – Equity Portfolios and Basket Investing Deep Link Generator</title>
 
 <style>
 /* ================= THEME TOKENS ================= */
@@ -348,21 +348,21 @@ document.addEventListener("keydown", e => {
 <body>
 <div class="container">
   <header>
-    <h1>SBI Securities · smallcase Deep Links</h1>
+    <h1>SBI Securities · Equity Portfolios and Basket Investing Deep Links</h1>
     <div class="theme-toggle" onclick="toggleTheme()">🌓 Theme</div>
   </header>
 
   <!-- EQ -->
   <div class="card">
-    <h2>Equity smallcases</h2>
+    <h2>Equity Portfolios and Basket Investing</h2>
 
     <label>
-      SBI smallcase URL
+      SBI Equity Portfolios and Basket Investing URL
       <span id="eqBadge" class="badge"></span>
     </label>
 
     <input id="eqInput" oninput="validate(this,'https://smallcases.sbisecurities.in',eqBadge,eqErr)" />
-    <div id="eqErr" class="error-text">Invalid Equity smallcase URL</div>
+    <div id="eqErr" class="error-text">Invalid Equity Portfolios and Basket Investing URL</div>
 
     <div class="actions">
       <button class="primary" onclick="generateEQ()">Generate</button>
