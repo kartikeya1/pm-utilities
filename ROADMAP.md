@@ -9,7 +9,9 @@ Phases are meant to be executed in order — P0 → P5. Within a phase, items ar
 The numbering is shared across all of Kartikeya's repos: **P0** stop the bleeding · **P1** tests/CI ·
 **P2** truth in docs · **P3** polish · **P4** features · **P5** decision-gated.
 
-_Last verified against the tree: 2026-07-29 · working tree clean, level with `origin/main` · 3 commits._
+_Last verified against the tree: 2026-07-29, after fetching origin (the local clone was 10 commits
+behind and had never fetched). Current origin includes the smallcase → "Equity Portfolios and Basket
+Investing" display-text rebrand, Axis broker support, and an MIT licence._
 
 > ⚠️ **This repository is public** (verified via `gh repo view`). Read Phase 0 before doing anything
 > else in here.
@@ -26,20 +28,15 @@ _Last verified against the tree: 2026-07-29 · working tree clean, level with `o
   missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
   ```
 - **Why an edit is not enough:** these lines were introduced in commit **`d2e84c5` — the initial commit**. Deleting them from the working tree leaves them in history, reachable from the public repo forever.
+- **Re-confirmed present after the rebrand.** The smallcase → "Equity Portfolios and Basket Investing" pass (commit `f96e0c4`) changed display text only and **did not touch these IDs** — they are still live at both line numbers above. So the rebrand, which might look like it addressed the internal-data question, did not.
 - **Proposed sequence (needs your approval before anything is executed):**
   1. **Decide the destination first.** Either (a) make the repo private now and scrub at leisure — far cheaper and reversible — or (b) keep it public and rewrite history. Option (a) is the recommendation: it stops the exposure in one dashboard action rather than after a successful rewrite.
   2. **Scrub the code.** Replace both hardcoded blocks with an empty default plus a paste-in textarea ("internal user IDs to exclude, one per line"), or a git-ignored local config. The tool keeps working; the data stops shipping. Do this once and reference it from both V1 and V2 rather than duplicating it a third time.
-  3. **Rewrite history** over the single affected file — `git filter-repo --path sbi-recon-evolution/index.html --replace-text <patterns>` — then force-push. Only 3 commits exist, so this is about as low-risk as a rewrite gets.
+  3. **Rewrite history** over the single affected file — `git filter-repo --path sbi-recon-evolution/index.html --replace-text <patterns>` — then force-push. Note the history now includes merged PRs, so this is no longer the 3-commit trivial case it was at first survey; check the rewrite preserves the rebrand and Axis commits.
   4. **Confirm Vercel redeployed** the scrubbed tree, and that no preview deployment still serves the old bundle.
   5. **Treat the IDs as already exposed regardless.** GitHub caches rewritten commits, forks and archives survive a force-push, and the repo has been public since 7 July 2026. If these IDs are sensitive enough to matter, the rewrite reduces future exposure — it does not undo past exposure. That's a call for you, not a technical step.
 
-### 0.2 — Production SSO keys and broker deep-link templates (lower risk, your judgement)
-
-- **Where:** 15 references across `README.md:88-93`, `deeplinks-generator/ENGINEERING.md:66-71`, and `deeplinks-generator/index.html:1067` and `:1110` — including `sso_key=IR_SMALLCASE`, `IR_MTF_BASKET_SMALLCASE`, and the `hdfcsec.com/invest-right-2022?key=sso` template.
-- **Assessment:** these are integration parameters, not credentials — a deep link is meant to be shareable, and the tool's entire purpose is to construct them. `README.md:64` already says the tool was "originally built for internal use at Smallcase". So this is disclosure of partner integration structure, not a secret leak.
-- **Decision needed:** fine to leave, or scrub alongside 0.1 while you're in there. Lower urgency than 0.1 by a wide margin.
-
-### 0.3 — Unverified migration cleanup
+### 0.2 — Unverified migration cleanup
 
 `MIGRATION.md:70-77` lists three manual steps with no record of completion:
 - [ ] Import the consolidated repo into Vercel.
@@ -58,15 +55,12 @@ _Last verified against the tree: 2026-07-29 · working tree clean, level with `o
 
 ## Phase 2 — Truth in docs
 
-- [ ] **A 45 KB file is shipped twice, and the docs claim it isn't.** `deeplinks-generator/index.html` is **byte-identical** to `deeplinks-generator/reference/Deeplinks.html` (md5 `876a311c4c00b37471f1704e85250435`, verified). `MIGRATION.md:25-30` says the manual-sync footgun was removed — the duplicate is still in the tree and still deployed. Delete `reference/Deeplinks.html`, or if it's kept deliberately as a historical artifact, say so in the README and exclude it from the deploy.
-- [ ] **`ENGINEERING.md` now actively misleads.** It documents the pre-consolidation repo:
-  - `:263-275` instructs `cp Deeplinks.html index.html` after every edit — a workflow that would *recreate* the duplication above.
-  - `:278` references a `/Deeplinks.html` route that no longer exists.
-  - `:283-296` is a testing checklist requiring that `Deeplinks.html` and `index.html` be identical.
-  - `:323-336` describes a file structure including a `package.json` that this repo doesn't have.
-  Either update it to the current layout or add a header marking it as a historical document.
+- [ ] **`ENGINEERING.md` still documents the pre-consolidation repo** and would mislead anyone following it:
+  - `:289` instructs `cp Deeplinks.html index.html` after every edit — a sync workflow that no longer applies, and following it would overwrite the live file with a legacy copy.
+  - `:314` is a testing-checklist item requiring that `Deeplinks.html` and `index.html` be **identical**. They are no longer identical, and are not meant to be (see the verified non-issue below), so this checkbox can never be ticked truthfully.
+  - `:350` describes a file structure including a `package.json` that this repo doesn't have.
+  Either update these three to the current layout, or add a header marking the affected sections as historical.
 - [ ] **The README claims accessibility work that is thin.** `README.md` lists "accessibility (ARIA labels, focus management, keyboard support, contrast)" as a demonstrated capability, but there are **5 `aria-` attributes in `sbi-recon-evolution/index.html` and 1 in `deeplinks-generator/index.html`**. Either do the work (P3) or soften the claim.
-- [ ] `ENGINEERING.md` §6 documents a recipe for "adding a new broker (e.g. Axis + Axis MTF)" — reads as though Axis is supported. It isn't. Move it to Phase 4 as an explicit unbuilt item (done below).
 
 ---
 
@@ -90,7 +84,6 @@ Carried over from `README.md`'s own "Future enhancements" list, plus one implied
 - [ ] Configurable key columns.
 - [ ] Export reconciliation rules as JSON.
 - [ ] Dark mode toggle.
-- [ ] **Axis broker support** (Axis + Axis MTF) in the deep-links generator — `ENGINEERING.md` §6 documents the recipe for adding it but it was never built.
 - [ ] Backport the external-`url` card capability from ai-experiments' `assets/home.js` (added in commit `0c10537` there), so this home can link out to tools that don't live in this repo. This repo's `home.js` predates that feature.
 
 ---
@@ -104,6 +97,10 @@ Carried over from `README.md`'s own "Future enhancements" list, plus one implied
 
 ## Verified non-issues (do not re-investigate)
 
+- **The `smallcase` strings still in `deeplinks-generator/index.html` are deliberate and must stay.** The rebrand (commit `f96e0c4`) changed **display text only**; `README.md:129` states the guardrail explicitly — never rename the broker identifiers or `/smallcase/` paths inside any URL, `sso_key`, or `sso_type`, and a find-and-replace on "smallcase" must skip them. These are functional integration parameters, not a branding oversight. `ENGINEERING.md` carries the same rule. **Do not "finish" the rebrand in that file.**
+- **`sso_key` values and broker deep-link templates are not a leak.** They're integration parameters that a deep link is meant to carry, and constructing them is the tool's entire purpose. Documented deliberately, per the guardrail above.
+- **`deeplinks-generator/reference/` is an intentional legacy folder, not accidental duplication.** It holds six preserved historical HTMLs and is documented at `README.md:129`. `reference/Deeplinks.html` is **no longer byte-identical** to `index.html` (md5 `3e64eadd…` vs `f74f575c…`), and is not meant to be — which is exactly why the `ENGINEERING.md:314` checklist item above is stale.
+- **Axis broker support is built** (Equity + MTF, commits `996cf6e` / `ded54f2` / `dc6f427`). `ENGINEERING.md` §6's "adding a new broker" recipe reads like Axis is hypothetical; it isn't.
 - **The config-driven home really is config-driven.** `assets/home.js` reads `window.SITE` / `window.PROJECTS` and builds the head, header, count, grid and footer with no hardcoded project data; `index.html` ships empty mount points. Both tool slugs resolve to real folders — **no dead links**.
 - **No TODO / FIXME / HACK markers** anywhere in the repo. Every gap above is silent.
 - The `// not yet valid, but still typing → stay neutral` comment at `deeplinks-generator/index.html:940` is intentional UX behaviour, not an unfinished thought.
