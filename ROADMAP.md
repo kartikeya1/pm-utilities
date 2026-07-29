@@ -20,7 +20,32 @@ Investing" display-text rebrand, Axis broker support, and an MIT licence._
 
 ## Phase 0 — Stop the bleeding
 
-### 0.1 — 23 real internal account IDs are in a public repo
+### 0.1a — ✅ DONE: IDs removed from the code and from git history
+
+Completed 2026-07-29.
+- The hardcoded list is gone from both the V1 and V2 recon blocks. IDs are now **operator input**: an optional "Internal user IDs to exclude" field per version, parsed by a shared `readInternalIds()` and injected into Pyodide alongside the existing `files` variable. Nothing is persisted or transmitted, and an empty field is a valid run.
+- Verified end to end in a browser against synthetic CSVs: with an ID entered the matching missing-in-basket row flags `InternalUser=True`; with the field empty the same row is `False`; neither path errors.
+- **History rewritten** with `git filter-repo` across all refs and force-pushed. All 23 identifiers scanned for across every blob in the rewritten history: **0 survive**. Historical commits now read `internaluserids = [REDACTED_ID, ...]`.
+- A pre-rewrite backup bundle is at `~/pm-utilities-prerewrite-backup/`. **It contains the real IDs** — delete it once you are satisfied, and do not copy it anywhere shared.
+
+### 0.1b — ⚠️ STILL OPEN: the IDs remain retrievable from GitHub
+
+**The force-push did not fully close this, and it cannot.** Verified after the rewrite: fetching
+`sbi-recon-evolution/index.html` at the original SHA `d2e84c5` still returns the file with all the
+real IDs in it.
+
+The reason is that this repo has three merged pull requests (#1 rebrand, #2 broker-identifier docs,
+#3 prose polish). GitHub keeps `refs/pull/<n>/head` pointing at the **original** commits, and a
+force-push to branch refs does not rewrite or remove them. Those objects therefore stay alive and
+publicly addressable by SHA. Closing or deleting the PRs does not help — PR refs are permanent.
+
+Remaining options, in order of effectiveness:
+- [ ] **Make the repo private.** Immediately removes public access to every old SHA, and is one action in Settings → General → Danger Zone. Reversible later, once the objects are actually gone. **Recommended.**
+- [ ] **Ask GitHub Support to purge the unreachable objects and cached views**, citing this repo and the fact that a history rewrite has already landed on all branch refs. This is the only route that removes them while the repo stays public. Support will typically ask you to confirm the rewrite is complete first — it is.
+- [ ] **Delete and recreate the repo** from the rewritten local clone. Nuclear but instant and total; loses stars, PR history and issue history (all negligible here — 3 docs PRs, no stars).
+- [ ] Regardless of route: **treat these identifiers as disclosed.** The repo was public from 2026-07-07 to now. Forks, clones, GitHub's own caches, and any third-party mirror or code-search index may retain them. If the IDs are sensitive enough to matter operationally, the durable fix is rotating/retiring them, not scrubbing git.
+
+### 0.1c — original finding (kept for context)
 
 - **Where:** `sbi-recon-evolution/index.html:729-734`, and **duplicated** at `:1511-1516` (the V1 and V2 copies of the recon block).
 - **What:** a hardcoded `internaluserids = [...]` list of 23 real identifiers, used at `:735` and `:1517` to flag internal users out of the reconciliation:
