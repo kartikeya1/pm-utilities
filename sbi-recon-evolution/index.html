@@ -431,6 +431,24 @@
 </div>
 
 <!-- ===== VERSION 1: MINIMAL / UTILITY FIRST ===== -->
+<script>
+  // Reads the "internal user IDs to exclude" field for a given version and
+  // returns a clean array of numeric IDs.
+  //
+  // These IDs used to be hardcoded here, which meant real internal account
+  // identifiers shipped in a public repo. They are operator input now: typed in
+  // per run, never persisted, never sent anywhere. An empty field simply means
+  // no rows get flagged as InternalUser, which is a valid run.
+  function readInternalIds(versionKey) {
+    const el = document.getElementById(versionKey + '-internalIds');
+    if (!el) return [];
+    return el.value
+      .split(/[\s,;]+/)
+      .map(function (t) { return t.trim(); })
+      .filter(function (t) { return /^\d+$/.test(t); })
+      .map(Number);
+  }
+</script>
 <div id="v1" class="version-container active">
   <div class="version-header">
     <span class="version-label v1">Version 1</span>
@@ -504,6 +522,12 @@ with open(output_file, 'w', newline='', encoding='utf-8') as out_file:
         </div>
         <div class="v1-row">
           <input type="file" id="v1-csvFilesForRecon" multiple accept=".csv" />
+        </div>
+        <div class="v1-row">
+          <label for="v1-internalIds">Internal user IDs to exclude (optional)</label>
+        </div>
+        <div class="v1-row">
+          <textarea id="v1-internalIds" rows="2" placeholder="Comma or newline separated, e.g. 10000001, 10000002" style="width:100%;font-family:inherit;font-size:inherit;padding:6px;"></textarea>
         </div>
         <div class="v1-row">
           <button class="v1-btn" id="v1-runBtn">Run Reconciliation</button>
@@ -626,6 +650,7 @@ import os
 files = ${JSON.stringify([])}
 `;
         await pyodide.runPythonAsync(`files = ${JSON.stringify(fileNames)}`);
+        await pyodide.runPythonAsync(`internaluserids = ${JSON.stringify(readInternalIds('v1'))}`);
 
         const coreCode = `
 import pandas as pd, io, zipfile, json
@@ -726,12 +751,7 @@ turnovermismatchdf = pd.DataFrame({
 missingInBasketFile = df1[df1UniqueKey.isin(file1onlykeys)].copy()
 missinginssl = df2[df2UniqueKey.isin(file2onlykeys)].copy()
 
-internaluserids = [
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID
-]
+# internaluserids is injected from the UI before this code runs (see JS).
 missingInBasketFile["InternalUser"] = missingInBasketFile.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
 
 def df_to_csv_str(df):
@@ -911,6 +931,9 @@ b64
                 <input type="file" id="v2-csvFilesForRecon" multiple accept=".csv" />
               </div>
               <div class="hint">The order of selecting the 2 files to upload matters. Select combined CSV first and then the Athena file.</div>
+              <label for="v2-internalIds" style="margin-top:12px;display:block;">Internal user IDs to exclude (optional)</label>
+              <textarea id="v2-internalIds" rows="2" placeholder="Comma or newline separated, e.g. 10000001, 10000002" style="width:100%;font-family:inherit;font-size:inherit;padding:6px;"></textarea>
+              <div class="hint">Flags these IDs as <code>InternalUser</code> in the missing-in-basket output. Stays in your browser; nothing is uploaded or stored.</div>
             </div>
             <div>
               <div id="v2-reconMeta" class="file-meta">No files selected.</div>
@@ -1408,6 +1431,7 @@ files = ${JSON.stringify([])}
 `;
 
         await pyodide.runPythonAsync(`files = ${JSON.stringify(fileNames)}`);
+        await pyodide.runPythonAsync(`internaluserids = ${JSON.stringify(readInternalIds('v2'))}`);
 
         const coreCode = `
 import pandas as pd, io, zipfile, json
@@ -1508,12 +1532,7 @@ turnovermismatchdf = pd.DataFrame({
 missingInBasketFile = df1[df1UniqueKey.isin(file1onlykeys)].copy()
 missinginssl = df2[df2UniqueKey.isin(file2onlykeys)].copy()
 
-internaluserids = [
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
-    REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID,
-    REDACTED_ID, REDACTED_ID, REDACTED_ID
-]
+# internaluserids is injected from the UI before this code runs (see JS).
 missingInBasketFile["InternalUser"] = missingInBasketFile.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
 
 def df_to_csv_str(df):

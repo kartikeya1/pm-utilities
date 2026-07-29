@@ -23,7 +23,7 @@ Investing" display-text rebrand, Axis broker support, and an MIT licence._
 ### 0.1 — 23 real internal account IDs are in a public repo
 
 - **Where:** `sbi-recon-evolution/index.html:729-734`, and **duplicated** at `:1511-1516` (the V1 and V2 copies of the recon block).
-- **What:** a hardcoded `internaluserids = [REDACTED_ID, REDACTED_ID, REDACTED_ID, REDACTED_ID, …]` list — 23 real identifiers — used at `:735` and `:1517` to flag internal users out of the reconciliation:
+- **What:** a hardcoded `internaluserids = [...]` list of 23 real identifiers, used at `:735` and `:1517` to flag internal users out of the reconciliation:
   ```
   missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
   ```
