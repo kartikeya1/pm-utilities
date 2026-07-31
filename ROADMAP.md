@@ -13,53 +13,51 @@ _Last verified against the tree: 2026-07-29, after fetching origin (the local cl
 behind and had never fetched). Current origin includes the smallcase → "Equity Portfolios and Basket
 Investing" display-text rebrand, Axis broker support, and an MIT licence._
 
-> ⚠️ **This repository is public** (verified via `gh repo view`). Read Phase 0 before doing anything
-> else in here.
+> ⚠️ **This repository is public, and that is a settled decision** (owner, 2026-07-30). Treat
+> everything committed here — including this file — as published. Read Phase 0 before doing anything
+> else in here, and never paste real identifiers or internal document text into any file in this repo.
 
 ---
 
 ## Phase 0 — Stop the bleeding
 
-### 0.1a — ✅ DONE: IDs removed from the code and from git history
+### 0.1 — Internal account IDs: code and history done; residual exposure accepted
 
-Completed 2026-07-29.
-- The hardcoded list is gone from both the V1 and V2 recon blocks. IDs are now **operator input**: an optional "Internal user IDs to exclude" field per version, parsed by a shared `readInternalIds()` and injected into Pyodide alongside the existing `files` variable. Nothing is persisted or transmitted, and an empty field is a valid run.
-- Verified end to end in a browser against synthetic CSVs: with an ID entered the matching missing-in-basket row flags `InternalUser=True`; with the field empty the same row is `False`; neither path errors.
-- **History rewritten** with `git filter-repo` across all refs and force-pushed. All 23 identifiers scanned for across every blob in the rewritten history: **0 survive**. Historical commits now read `internaluserids = [REDACTED_ID, ...]`.
-- A pre-rewrite backup bundle is at `~/pm-utilities-prerewrite-backup/`. **It contains the real IDs** — delete it once you are satisfied, and do not copy it anywhere shared.
+**Status: the code and git history are clean. A residual exposure remains and has been accepted by
+the owner.** Deliberately written without the retrieval details — this file is public, and an earlier
+version of this section named the specific commit and the mechanism, which turned the backlog into a
+how-to for the thing it was tracking.
 
-### 0.1b — ⚠️ STILL OPEN: the IDs remain retrievable from GitHub
+**Done (2026-07-29)**
+- The hardcoded list is gone from both the V1 and V2 recon blocks. The IDs are now **operator input**:
+  an optional "Internal user IDs to exclude" field per version, parsed by a shared
+  `readInternalIds()` and injected into Pyodide alongside the existing `files` variable. Nothing is
+  persisted or transmitted, and an empty field is a valid run.
+- Verified end to end in a browser against synthetic CSVs: with an ID entered, the matching
+  missing-in-basket row flags `InternalUser=True`; with the field empty the same row is `False`;
+  neither path errors. The placeholder example in the field is deliberately fake.
+- **History rewritten** across all branch refs with `git filter-repo` and force-pushed. Every one of
+  the 23 identifiers was then scanned for across every blob in the rewritten history: **none survive.**
+  `main` is clean.
 
-**The force-push did not fully close this, and it cannot.** Verified after the rewrite: fetching
-`sbi-recon-evolution/index.html` at the original SHA `d2e84c5` still returns the file with all the
-real IDs in it.
+**Residual exposure — accepted, not open**
+- A force-push rewrites branch refs. It does **not** reach objects that GitHub retains via the refs it
+  keeps for merged pull requests, and there is no push, revert or repo-side command that removes
+  those. This is a platform property, not a mistake in the rewrite.
+- **Decision (owner, 2026-07-30): the repository stays public and this residual is accepted.** Not to
+  be re-raised. Do not propose changing visibility again.
+- If it is ever revisited, exactly two routes actually remove the retained objects: ask GitHub Support
+  to purge them (a request draft was prepared for this), or delete and recreate the repository from
+  the rewritten clone. Both are the owner's call.
+- **The honest bottom line:** the repository was public throughout, so these identifiers should be
+  treated as disclosed regardless of what git now says. Forks, clones, platform caches and
+  third-party code-search indexes may retain them. If they matter operationally, the durable fix is
+  retiring or rotating the identifiers — not scrubbing version control. That is the only remediation
+  that does not depend on anyone else's cooperation.
 
-The reason is that this repo has three merged pull requests (#1 rebrand, #2 broker-identifier docs,
-#3 prose polish). GitHub keeps `refs/pull/<n>/head` pointing at the **original** commits, and a
-force-push to branch refs does not rewrite or remove them. Those objects therefore stay alive and
-publicly addressable by SHA. Closing or deleting the PRs does not help — PR refs are permanent.
-
-Remaining options, in order of effectiveness:
-- [ ] **Make the repo private.** Immediately removes public access to every old SHA, and is one action in Settings → General → Danger Zone. Reversible later, once the objects are actually gone. **Recommended.**
-- [ ] **Ask GitHub Support to purge the unreachable objects and cached views**, citing this repo and the fact that a history rewrite has already landed on all branch refs. This is the only route that removes them while the repo stays public. Support will typically ask you to confirm the rewrite is complete first — it is.
-- [ ] **Delete and recreate the repo** from the rewritten local clone. Nuclear but instant and total; loses stars, PR history and issue history (all negligible here — 3 docs PRs, no stars).
-- [ ] Regardless of route: **treat these identifiers as disclosed.** The repo was public from 2026-07-07 to now. Forks, clones, GitHub's own caches, and any third-party mirror or code-search index may retain them. If the IDs are sensitive enough to matter operationally, the durable fix is rotating/retiring them, not scrubbing git.
-
-### 0.1c — original finding (kept for context)
-
-- **Where:** `sbi-recon-evolution/index.html:729-734`, and **duplicated** at `:1511-1516` (the V1 and V2 copies of the recon block).
-- **What:** a hardcoded `internaluserids = [...]` list of 23 real identifiers, used at `:735` and `:1517` to flag internal users out of the reconciliation:
-  ```
-  missinginsmallcase["InternalUser"] = missinginsmallcase.iloc[:,2].astype(str).isin([str(x) for x in internaluserids])
-  ```
-- **Why an edit is not enough:** these lines were introduced in commit **`d2e84c5` — the initial commit**. Deleting them from the working tree leaves them in history, reachable from the public repo forever.
-- **Re-confirmed present after the rebrand.** The smallcase → "Equity Portfolios and Basket Investing" pass (commit `f96e0c4`) changed display text only and **did not touch these IDs** — they are still live at both line numbers above. So the rebrand, which might look like it addressed the internal-data question, did not.
-- **Proposed sequence (needs your approval before anything is executed):**
-  1. **Decide the destination first.** Either (a) make the repo private now and scrub at leisure — far cheaper and reversible — or (b) keep it public and rewrite history. Option (a) is the recommendation: it stops the exposure in one dashboard action rather than after a successful rewrite.
-  2. **Scrub the code.** Replace both hardcoded blocks with an empty default plus a paste-in textarea ("internal user IDs to exclude, one per line"), or a git-ignored local config. The tool keeps working; the data stops shipping. Do this once and reference it from both V1 and V2 rather than duplicating it a third time.
-  3. **Rewrite history** over the single affected file — `git filter-repo --path sbi-recon-evolution/index.html --replace-text <patterns>` — then force-push. Note the history now includes merged PRs, so this is no longer the 3-commit trivial case it was at first survey; check the rewrite preserves the rebrand and Axis commits.
-  4. **Confirm Vercel redeployed** the scrubbed tree, and that no preview deployment still serves the old bundle.
-  5. **Treat the IDs as already exposed regardless.** GitHub caches rewritten commits, forks and archives survive a force-push, and the repo has been public since 7 July 2026. If these IDs are sensitive enough to matter, the rewrite reduces future exposure — it does not undo past exposure. That's a call for you, not a technical step.
+**Guardrail for future work in this file**
+- Do not paste real identifiers, account numbers or internal document text into this backlog, even to
+  describe a problem. Reference `file:line` instead. A public backlog is published material.
 
 ### 0.2 — Unverified migration cleanup
 
@@ -115,8 +113,12 @@ Carried over from `README.md`'s own "Future enhancements" list, plus one implied
 
 ## Phase 5 — Decision-gated
 
-- [ ] **Should this repo be public at all?** It is the only repo in the portfolio holding real internal identifiers, and the tools are explicitly internal smallcase utilities. With employment ending July 2026, the options are: keep public after scrubbing (it does demonstrate real Pyodide/pandas/browser work), make private, or archive. This decision changes how much of Phase 0 is needed — make it first.
-- [ ] If it stays public: does the SBI/HDFC integration detail in 0.2 stay too?
+- [x] **Should this repo be public? — DECIDED: stays public** (owner, 2026-07-30). Asked because this
+  was the only repo in the portfolio that had held real internal identifiers, and the tools are
+  explicitly internal utilities. The code and history have since been scrubbed, and the residual
+  platform-side exposure described in 0.1 is accepted. **Settled — do not re-open.**
+- [x] **Does the SBI/HDFC integration detail stay? — yes**, and it must: those strings are functional
+  deep-link parameters, not secrets. See the verified non-issues below before touching them.
 
 ---
 
