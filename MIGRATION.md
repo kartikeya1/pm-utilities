@@ -1,4 +1,4 @@
-# Migration Record — pm-utilities
+# Migration Record - pm-utilities
 
 ## Summary
 
@@ -20,28 +20,28 @@ the single canonical app; the former duplicate + 3 legacy/reference HTMLs moved 
 `deeplinks-generator/reference/` (reference-only). This removes the sync footgun without changing
 the deployed app. See `deeplinks-generator/ENGINEERING.md` (verbatim original engineering doc + note).
 
-**Not migrated:** `.env.local` (auto-generated **Vercel OIDC token** — a secret; gitignored),
+**Not migrated:** `.env.local` (auto-generated **Vercel OIDC token** - a secret; gitignored),
 `.vercel/`, `package.json` scripts (just a local `http.server` alias; superseded by this README).
 
 ## Documentation mapping
 
 | Original repo → section | New location |
 |---|---|
-| **sbi-recon README** — The Story (V1/V2) | README → SBI Reconciliation → V1/V2 |
-| sbi-recon README — Features (CSV combining, reconciliation, 6 reports) | README → SBI → Features |
-| sbi-recon README — Tech Stack | README → Tech (+ SBI section) |
-| sbi-recon README — How to Run Locally | README → Development |
-| sbi-recon README — Architecture (single file, two designs) | README → SBI → Architecture & design system |
-| sbi-recon README — Design System (V2) | README → SBI → Architecture & design system (tokens) |
-| sbi-recon README — Portfolio Value | README → SBI → Portfolio value |
-| sbi-recon README — Future Enhancements | README → SBI → Future enhancements |
-| sbi-recon README — Author / License | README (author preserved in prose); MIT retained |
-| **deeplinks README** — entire "for the next engineer" guide | `deeplinks-generator/ENGINEERING.md` (**verbatim** + migration note) |
-| deeplinks README — What the tool does + output formats table | README → Deep Links Generator (summary + table) |
-| deeplinks README — Golden rules | README → callout + ENGINEERING.md §1 |
-| deeplinks README — Add-a-broker recipe / ID convention / testing | ENGINEERING.md §5,§6,§8 (verbatim) |
-| deeplinks README — File structure / sync notes | ENGINEERING.md (verbatim) + this file's Structural change note |
-| deeplinks — legacy/reference HTMLs | `deeplinks-generator/reference/` (+ its README) |
+| **sbi-recon README** - The Story (V1/V2) | README → SBI Reconciliation → V1/V2 |
+| sbi-recon README - Features (CSV combining, reconciliation, 6 reports) | README → SBI → Features |
+| sbi-recon README - Tech Stack | README → Tech (+ SBI section) |
+| sbi-recon README - How to Run Locally | README → Development |
+| sbi-recon README - Architecture (single file, two designs) | README → SBI → Architecture & design system |
+| sbi-recon README - Design System (V2) | README → SBI → Architecture & design system (tokens) |
+| sbi-recon README - Portfolio Value | README → SBI → Portfolio value |
+| sbi-recon README - Future Enhancements | README → SBI → Future enhancements |
+| sbi-recon README - Author / License | README (author preserved in prose); MIT retained |
+| **deeplinks README** - entire "for the next engineer" guide | `deeplinks-generator/ENGINEERING.md` (**verbatim** + migration note) |
+| deeplinks README - What the tool does + output formats table | README → Deep Links Generator (summary + table) |
+| deeplinks README - Golden rules | README → callout + ENGINEERING.md §1 |
+| deeplinks README - Add-a-broker recipe / ID convention / testing | ENGINEERING.md §5,§6,§8 (verbatim) |
+| deeplinks README - File structure / sync notes | ENGINEERING.md (verbatim) + this file's Structural change note |
+| deeplinks - legacy/reference HTMLs | `deeplinks-generator/reference/` (+ its README) |
 
 **Nothing dropped.** New material: shared Architecture + "Adding a future utility" guide.
 
@@ -58,7 +58,7 @@ the deployed app. See `deeplinks-generator/ENGINEERING.md` (verbatim original en
 | Check | Result |
 |---|---|
 | App files vs originals | ✅ **byte-identical** (`diff` clean) |
-| Deep-link business logic | ✅ `loadHDFCIRSample(); generateHDFCIR()` produced the exact `extra_param` JSON shape (`path`, `utm_*`, `add_params:true`) — unchanged from production |
+| Deep-link business logic | ✅ `loadHDFCIRSample(); generateHDFCIR()` produced the exact `extra_param` JSON shape (`path`, `utm_*`, `add_params:true`) - unchanged from production |
 | Generators present | ✅ `generateSBIEQ`, `generateSBIMTF`, `generateHDFCIR`, `generateHDFCMTF`, `generateHDFCSky` |
 | Home cards config-driven | ✅ 2 cards, correct routes/chips |
 | Assets resolve | ✅ no failed requests (Pyodide from CDN) |
