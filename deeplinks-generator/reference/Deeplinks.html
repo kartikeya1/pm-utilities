@@ -6,7 +6,7 @@
 <title>Equity Portfolios and Basket Investing Deep Links Generator</title>
 
 <!-- Inline SVG favicon (a link/chain glyph). Kept inline so the page stays
-     fully self-contained — no external asset requests (works offline / on any host). -->
+     fully self-contained - no external asset requests (works offline / on any host). -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%97%3C/text%3E%3C/svg%3E" />
 
 <style>
@@ -277,7 +277,7 @@ input[type="text"]:focus, textarea:focus {
   background: var(--surface);
 }
 
-/* Red state — only applied when a real error is asserted (on Generate), never mid-typing */
+/* Red state - only applied when a real error is asserted (on Generate), never mid-typing */
 input.error {
   border-color: var(--danger);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
@@ -646,7 +646,7 @@ textarea {
         <div id="hdfcirErr" class="error-text">Invalid IR Basket URL</div>
       </div>
 
-      <!-- UTM block — values are read by generateHDFCIR() and bundled into extra_param JSON -->
+      <!-- UTM block - values are read by generateHDFCIR() and bundled into extra_param JSON -->
       <div class="utm">
         <div class="utm-head">UTM parameters <span class="muted">(optional)</span></div>
         <p class="hint">Bundled into the <code>extra_param</code> JSON. Blank fields are still sent as empty strings.</p>
@@ -721,7 +721,7 @@ textarea {
         <div id="hdfcmtfErr" class="error-text">Invalid MTF basket URL</div>
       </div>
 
-      <!-- UTM block — values are read by generateHDFCMTF() and bundled into extra_param JSON -->
+      <!-- UTM block - values are read by generateHDFCMTF() and bundled into extra_param JSON -->
       <div class="utm">
         <div class="utm-head">UTM parameters <span class="muted">(optional)</span></div>
         <p class="hint">Bundled into the <code>extra_param</code> JSON. Blank fields are still sent as empty strings.</p>
@@ -825,22 +825,22 @@ textarea {
 
 <script>
 /* ============================================================================
-   Equity Portfolios and Basket Investing Deep Links Generator — application script
+   Equity Portfolios and Basket Investing Deep Links Generator - application script
    ----------------------------------------------------------------------------
    HOW THIS FILE IS ORGANISED (please read README.md before editing):
 
-     1. UI HELPERS      — theme, tabs, toast, clipboard, live validation.
+     1. UI HELPERS      - theme, tabs, toast, clipboard, live validation.
                           Safe to restyle / tweak. This is presentation only.
 
-     2. VALIDATION GATE — validate(): the strict prefix check that GATES link
-                          generation. Business logic — do not weaken it.
+     2. VALIDATION GATE - validate(): the strict prefix check that GATES link
+                          generation. Business logic - do not weaken it.
 
-     3. GENERATORS      — one generate*() per product. These build the actual
-                          deep-link strings. *** BUSINESS LOGIC — DO NOT EDIT
+     3. GENERATORS      - one generate*() per product. These build the actual
+                          deep-link strings. *** BUSINESS LOGIC - DO NOT EDIT
                           the URL templates, encoding, JSON shape or sso_keys.
                           They are verified correct. ***
 
-     4. SAMPLE LOADERS  — fill demo data for quick testing.
+     4. SAMPLE LOADERS  - fill demo data for quick testing.
 
      5. KEYBOARD SHORTCUTS.
 
@@ -909,18 +909,18 @@ function showToast(msg) {
 function copyToClipboard(id) {
   const el = document.getElementById(id);
   if (!el || !el.value) {
-    showToast("Nothing to copy — generate a link first");
+    showToast("Nothing to copy - generate a link first");
     return;
   }
   navigator.clipboard.writeText(el.value)
     .then(() => showToast("Copied to clipboard"))
-    .catch(() => showToast("Copy failed — select the text and copy manually"));
+    .catch(() => showToast("Copy failed - select the text and copy manually"));
 }
 
 /* ---- Live validation (runs on every keystroke) ----
    FRIENDLY by design: it only ever shows the positive "Valid" badge and always
    clears any red error state. It NEVER shows a red error while the user is
-   still typing — that was the old "phantom error" bug. The hard invalid state
+   still typing - that was the old "phantom error" bug. The hard invalid state
    is asserted only on an actual Generate attempt, by validate() below. */
 function liveValidate(input, domain, badge, err) {
   const v = input.value.trim();
@@ -943,11 +943,11 @@ function liveValidate(input, domain, badge, err) {
 }
 
 /* ============================================================================
-   2. VALIDATION GATE  (business logic — the strict check that gates Generate)
+   2. VALIDATION GATE  (business logic - the strict check that gates Generate)
    ----------------------------------------------------------------------------
    Called by every generator and by the sample loaders. Unlike liveValidate,
    this DOES show the red invalid state, because reaching here means the user
-   has committed to generating — so a bad URL is a real, reportable error.
+   has committed to generating - so a bad URL is a real, reportable error.
    ============================================================================ */
 function validate(input, domain, badge, err) {
   const v = input.value.trim();
@@ -974,7 +974,7 @@ function base64Encode(input) {
 }
 
 /* ============================================================================
-   3. GENERATORS  — *** BUSINESS LOGIC: DO NOT EDIT THE OUTPUT TEMPLATES ***
+   3. GENERATORS  - *** BUSINESS LOGIC: DO NOT EDIT THE OUTPUT TEMPLATES ***
    Each function: (1) validates the URL, (2) splits base path from query, and
    (3) assembles the broker-specific deep link. The exact string formats,
    encoding schemes, JSON shapes and sso_keys below are verified correct.

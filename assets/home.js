@@ -1,8 +1,8 @@
 /* ============================================================
-   Shared showcase home — renderer
+   Shared showcase home - renderer
    Reads window.SITE (config/site.js) and window.PROJECTS
    (config/projects.js) and builds the page. Adding a project
-   requires only a new entry in config/projects.js — never a
+   requires only a new entry in config/projects.js - never a
    change to this file.
    ============================================================ */
 (function () {
@@ -15,7 +15,7 @@
     var meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', SITE.tagline);
   }
-  // Favicon is a real file (/favicon.svg) referenced statically in index.html —
+  // Favicon is a real file (/favicon.svg) referenced statically in index.html -
   // Vercel's dashboard renders that as the project icon; the on-page header still uses SITE.emoji.
   if (SITE.accent) document.documentElement.style.setProperty('--accent', SITE.accent);
 

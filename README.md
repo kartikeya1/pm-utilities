@@ -1,4 +1,4 @@
-# 🧮 Product Management — Utilities
+# 🧮 Product Management - Utilities
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Build: none](https://img.shields.io/badge/build-none-brightgreen)
@@ -13,7 +13,7 @@ own route.
 ## Contents
 
 - [Projects](#projects)
-- [SBI Reconciliation Tool — Evolution](#sbi-reconciliation-tool--evolution)
+- [SBI Reconciliation Tool - Evolution](#sbi-reconciliation-tool--evolution)
 - [Equity Portfolios and Basket Investing Deep Links Generator](#equity-portfolios-and-basket-investing-deep-links-generator)
 - [Architecture](#architecture)
 - [Development](#development)
@@ -27,30 +27,30 @@ own route.
 
 | Route | Tool | What it is |
 |-------|------|------------|
-| [`/sbi-recon-evolution`](sbi-recon-evolution/) | **SBI Reconciliation Tool — Evolution** | CSV combining + reconciliation in the browser via Pyodide (pandas), shown in two design iterations. |
+| [`/sbi-recon-evolution`](sbi-recon-evolution/) | **SBI Reconciliation Tool - Evolution** | CSV combining + reconciliation in the browser via Pyodide (pandas), shown in two design iterations. |
 | [`/deeplinks-generator`](deeplinks-generator/) | **Equity Portfolios and Basket Investing Deep Links Generator** | Converts a broker's basket web URL into a ready-to-use in-app deep link (SBI, HDFC, Axis). |
 
 <br>
 
-## SBI Reconciliation Tool — Evolution
+## SBI Reconciliation Tool - Evolution
 
 A **single-file web application** demonstrating an approach to building internal tools: **utility
 first, then polish with thoughtful UX/UI**. It showcases two versions of the same tool in one
 interactive experience.
 
-- **Version 1 — Utility First 🔧** — the bare-bones original: core business logic (CSV combining,
+- **Version 1 - Utility First 🔧** - the bare-bones original: core business logic (CSV combining,
   reconciliation), functional file handling with Pyodide (Python in the browser), direct
   problem-solving. Goal: *"Does this solve the problem?"*
-- **Version 2 — UX Polish ✨** — same powerful logic, designed for real users: file metadata
+- **Version 2 - UX Polish ✨** - same powerful logic, designed for real users: file metadata
   (size, count), validation hints and error messages, a professional design system, animated
   status/loading states, structured colored logging, accessible responsive layout.
   Goal: *"How do I make this trustworthy and delightful?"*
 
 ### Features
 
-**CSV Combining** — upload multiple CSV files, merge them into a single output, instant download.
+**CSV Combining** - upload multiple CSV files, merge them into a single output, instant download.
 
-**Reconciliation** — upload two fixed-format CSV files (Combined CS + Athena File); automatic
+**Reconciliation** - upload two fixed-format CSV files (Combined CS + Athena File); automatic
 reconciliation with pandas; generates **6 output reports** (Matching Unique Keys Summary, Missing in
 Equity Portfolios and Basket Investing, Missing in SSL, Date Mismatches, Quantity Mismatches, Turnover Mismatches); download all
 results as a ZIP.
@@ -59,7 +59,7 @@ results as a ZIP.
 
 The HTML contains both implementations side by side in tabs. V1 uses minimal CSS + semantic markup;
 V2 layers a design system with CSS variables and grid layouts. Switching versions reuses the same
-Pyodide runtime and business logic — only the UI layer changes.
+Pyodide runtime and business logic - only the UI layer changes.
 
 ```css
 --brand: #1d4ed8    /* Primary actions */
@@ -72,7 +72,7 @@ Responsive breakpoint at 900px for mobile.
 
 ### Portfolio value
 
-Demonstrates problem-first thinking (a real bottleneck — manual reconciliation took hours),
+Demonstrates problem-first thinking (a real bottleneck - manual reconciliation took hours),
 backend chops (Python logic: unique-key construction, mismatch detection, ZIP generation),
 frontend judgment (two versions show that **utility ≠ UX**), technical breadth (Pyodide, pandas,
 CSV/ZIP handling, browser APIs), accessibility (ARIA labels, focus management, keyboard support,
@@ -115,15 +115,15 @@ deep-link string (for HDFC IR/MTF, embedding UTM fields into a JSON `extra_param
 
 > 🔒 **Why some values still say `SMALLCASE` / `small-case`.** The tokens above
 > (`IR_SMALLCASE`, `IR_MTF_BASKET_SMALLCASE`, `EQUITY_SMALLCASE`, `hdfc-small-case`), the broker
-> domains, and the `/smallcase/` URL path are **broker-owned identifiers** — they are the literal
+> domains, and the `/smallcase/` URL path are **broker-owned identifiers** - they are the literal
 > strings the brokers' SSO endpoints expect. They are intentionally left unchanged and are **not**
 > part of this repo's product naming. Renaming any of them breaks link generation. Only human-facing
 > display text was rebranded to "Equity Portfolios and Basket Investing".
 
-> ⚠️ **The link-generation business logic is verified correct in production — do not change what
+> ⚠️ **The link-generation business logic is verified correct in production - do not change what
 > any `generate*()` function outputs.** Restyle freely; never touch the output format. This includes
 > never renaming the broker identifiers or `/smallcase/` paths inside any URL, `sso_key`, or
-> `sso_type` — a find-and-replace on "smallcase" must skip them. The full engineering guide, ID
+> `sso_type` - a find-and-replace on "smallcase" must skip them. The full engineering guide, ID
 > naming convention, and a step-by-step **recipe for adding a new broker** live in
 > [`deeplinks-generator/ENGINEERING.md`](deeplinks-generator/ENGINEERING.md). Read its "Golden
 > rules" before editing. Reference/legacy HTMLs are preserved under
@@ -137,8 +137,8 @@ deep-link string (for HDFC IR/MTF, embedding UTM fields into a JSON `extra_param
 pm-utilities/
 ├── index.html                          # Generic home shell (loads config + renderer)
 ├── config/
-│   ├── site.js                         # window.SITE — page title, tagline, emoji, accent
-│   └── projects.js                     # window.PROJECTS — THE registry (single source of truth)
+│   ├── site.js                         # window.SITE - page title, tagline, emoji, accent
+│   └── projects.js                     # window.PROJECTS - THE registry (single source of truth)
 ├── assets/
 │   ├── home.css                        # Shared card-grid styling (dark, responsive)
 │   └── home.js                         # Renders cards from window.PROJECTS
@@ -151,7 +151,7 @@ pm-utilities/
 └── README.md
 ```
 
-**How routing works.** Each tool is a top-level folder served natively by Vercel at `/<folder>` —
+**How routing works.** Each tool is a top-level folder served natively by Vercel at `/<folder>` -
 clean routes, deep links, and refresh with **no rewrite rules**. All asset paths are relative, so
 nesting under a route works unchanged. The home page renders from `config/projects.js`.
 
@@ -168,7 +168,7 @@ python3 -m http.server 8000
 # deep links:     http://localhost:8000/deeplinks-generator/
 ```
 
-The SBI tool loads Pyodide (pandas) from a CDN on first use — allow a few seconds and keep the tab
+The SBI tool loads Pyodide (pandas) from a CDN on first use - allow a few seconds and keep the tab
 online for that initial load.
 
 <br>
@@ -184,7 +184,7 @@ Two steps, one config edit:
    { slug: "my-tool", title: "My Tool", tagline: "One-line description.", tags: ["Tag"] }
    ```
 
-`slug` must equal the folder name (it becomes the route). The home page updates automatically — no
+`slug` must equal the folder name (it becomes the route). The home page updates automatically - no
 changes to `index.html`, `home.js`, or `vercel.json`.
 
 <br>

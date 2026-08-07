@@ -4,14 +4,14 @@
 >
 > 1. The served app is **`deeplinks-generator/index.html`** (route `/deeplinks-generator`). The
 >    old "`index.html` and `Deeplinks.html` are duplicates, keep them in sync" footgun (§3, §7) is
->    **gone** — `index.html` is now the single canonical app. The former duplicate `Deeplinks.html`
+>    **gone** - `index.html` is now the single canonical app. The former duplicate `Deeplinks.html`
 >    and the three legacy/reference HTMLs now live under **`reference/`** (reference-only; not
 >    routed, not part of the app).
 > 2. Deployment is via the parent `pm-utilities` repo (see its top-level README), not a per-tool
 >    Vercel project.
 >
-> Everything else below — the golden rules, the generator business logic, the ID naming
-> convention, the add-a-broker recipe, and the testing checklist — is unchanged and authoritative.
+> Everything else below - the golden rules, the generator business logic, the ID naming
+> convention, the add-a-broker recipe, and the testing checklist - is unchanged and authoritative.
 >
 > ---
 
@@ -22,7 +22,7 @@ A single-file web tool that converts a broker's **basket web URL** into a
 (Equity, MTF), **HDFC** (IR, MTF, HDFC Sky) and **Axis** (Equity, MTF).
 
 > **This README is written for the next engineer or AI who edits this tool.**
-> The most likely next task is **adding a new broker** — there is a complete
+> The most likely next task is **adding a new broker** - there is a complete
 > step-by-step recipe for that below (§6), written around Axis as the example.
 > Axis has since been implemented, so §6 doubles as a worked reference: compare
 > it against the `generateAxisEQ` / `generateAxisMTF` functions in the code.
@@ -44,7 +44,7 @@ A single-file web tool that converts a broker's **basket web URL** into a
    Vercel serves at the root URL; `Deeplinks.html` is the working/canonical
    copy. **After any edit you must copy one to the other** (see §7). If they
    drift apart, the deployed site won't match what you edited.
-4. **Keep it a single self-contained file.** No external CSS/JS/fonts/images —
+4. **Keep it a single self-contained file.** No external CSS/JS/fonts/images -
    everything is inlined so it works offline and on any static host.
 5. **Never rename broker identifiers when rebranding display text.** The word
    `smallcase` (and `small-case`) survives on purpose inside broker-owned strings:
@@ -53,7 +53,7 @@ A single-file web tool that converts a broker's **basket web URL** into a
    `IR_MTF_BASKET_SMALLCASE`, `EQUITY_SMALLCASE`, `hdfc-small-case`). These are the
    literal values the brokers' endpoints expect. Product display text was
    rebranded to "Equity Portfolios and Basket Investing"; a blind
-   find-and-replace on "smallcase" **will break link generation** — always mask
+   find-and-replace on "smallcase" **will break link generation** - always mask
    URLs, `sso_key`/`sso_type` values, and paths first.
 
 ---
@@ -72,7 +72,7 @@ Every broker follows the same 3-step shape inside its `generate*()` function:
 The differences between brokers are only in step 3 (the output format) and the
 domain string in step 1.
 
-### Current output formats (for reference — do not modify)
+### Current output formats (for reference - do not modify)
 
 | Product   | `sso_key` / route                    | Encoding of path/params |
 |-----------|--------------------------------------|-------------------------|
@@ -108,16 +108,16 @@ The file has three parts: `<style>`, the `<body>` markup, and the `<script>`.
 - The rest is plain sectioned CSS (header, tabs, card, form, utm, actions,
   output, toast, responsive). Every section has a comment header.
 
-### `<script>` — organised into 5 numbered sections:
-1. **UI HELPERS** — `toggleTheme`, `switchTab`, `showToast`, `copyToClipboard`,
+### `<script>` - organised into 5 numbered sections:
+1. **UI HELPERS** - `toggleTheme`, `switchTab`, `showToast`, `copyToClipboard`,
    `liveValidate`. Presentation only; safe to tweak.
-2. **VALIDATION GATE** — `validate()` (the strict prefix check that gates
+2. **VALIDATION GATE** - `validate()` (the strict prefix check that gates
    generation) + `base64Encode()`.
-3. **GENERATORS** — `generateSBIEQ`, `generateSBIMTF`, `generateHDFCIR`,
+3. **GENERATORS** - `generateSBIEQ`, `generateSBIMTF`, `generateHDFCIR`,
    `generateHDFCMTF`, `generateHDFCSky`, `generateAxisEQ`, `generateAxisMTF`.
    **← business logic, do not edit output.**
-4. **SAMPLE LOADERS** — `loadXXXSample()` fill demo data.
-5. **KEYBOARD SHORTCUTS** — routes ⌘/Ctrl+Enter (generate), ⌘/Ctrl+Shift+C
+4. **SAMPLE LOADERS** - `loadXXXSample()` fill demo data.
+5. **KEYBOARD SHORTCUTS** - routes ⌘/Ctrl+Enter (generate), ⌘/Ctrl+Shift+C
    (copy), ⌘/Ctrl+J (theme) based on the active tab + focused card.
 
 ---
@@ -130,7 +130,7 @@ typing. It's fixed by splitting validation in two:
 - **`liveValidate()`** runs on every keystroke (`oninput`). It is *friendly*:
   shows the green **Valid** badge when the prefix matches, and otherwise stays
   **neutral**. It NEVER shows the red error while typing.
-- **`validate()`** runs only when the user commits — i.e. inside each
+- **`validate()`** runs only when the user commits - i.e. inside each
   `generate*()` and the sample loaders. It DOES show the red invalid state,
   because at that point a bad URL is a real, reportable error.
 
@@ -157,7 +157,7 @@ template (`hdfc_ir`):
 | Tab panel          | `<tab>-content`         | `hdfc-content`         |
 
 > ⚠️ Note the badge/err IDs are **compact** (no underscore: `hdfcirBadge`, not
-> `hdfc_irBadge`) — that's a historical quirk. Match whatever you use in the
+> `hdfc_irBadge`) - that's a historical quirk. Match whatever you use in the
 > HTML with what the generator references. Consistency within a generator is all
 > that matters.
 
@@ -171,26 +171,26 @@ and `*-card` (cards) IDs, so keep those.
 Assume Axis lives in its **own new tab** (like SBI and HDFC). If instead Axis is
 just another card inside an existing tab, skip the tab steps.
 
-**Before you start:** get the real answers to these from the broker/PM —
+**Before you start:** get the real answers to these from the broker/PM -
 guessing will produce broken links:
 - The **web domain** each URL must start with (for the `validate` gate).
 - The exact **output deep-link format** (route/`sso_key`, and how `path`/params
-  are encoded — base64? plain? JSON `extra_param`?).
+  are encoded - base64? plain? JSON `extra_param`?).
 - Whether it supports **UTM parameters**.
 
-### Step 1 — Add the tab button
+### Step 1 - Add the tab button
 In the `.tabs-container`:
 ```html
 <button class="tab-button" onclick="switchTab('axis', this)">Axis</button>
 ```
 
-### Step 2 — Add the tab panel + card(s)
+### Step 2 - Add the tab panel + card(s)
 Copy an existing `.tab-content` block and adapt IDs/labels. Use the **SBI card**
 as the template if Axis has no UTMs, or the **HDFC IR card** if it does.
 Minimum for one Axis product (key = `axis`):
 ```html
 <div id="axis-content" class="tab-content">
-  <div class="tab-intro">Paste an <strong>Axis</strong> basket web URL…</div>
+  <div class="tab-intro">Paste an <strong>Axis</strong> basket web URL...</div>
 
   <div class="card" id="axis-eq-card">
     <div class="card-head">
@@ -229,7 +229,7 @@ For **Axis MTF**, duplicate the card with key `axis_mtf`, id `axis-mtf-card`,
 and (if it has UTMs) copy the `.utm` block from HDFC, renaming every
 `hdfc_mtf_*` id to `axis_mtf_*`.
 
-### Step 3 — Add the generator(s) in `<script>` §3
+### Step 3 - Add the generator(s) in `<script>` §3
 Model it on the closest existing broker. Example skeleton (adjust the output to
 the **real** Axis format):
 ```js
@@ -256,7 +256,7 @@ function generateAxis() {
 If Axis MTF uses the HDFC-style JSON `extra_param`, copy `generateHDFCMTF`
 verbatim and change only the `sso_key` and the UTM element IDs.
 
-### Step 4 — Add sample loader(s) in §4
+### Step 4 - Add sample loader(s) in §4
 ```js
 function loadAxisSample() {
   document.getElementById('axisInput').value = 'https://SMALLCASE_WEB_DOMAIN/smallcase/AXIS_0001';
@@ -265,7 +265,7 @@ function loadAxisSample() {
 ```
 (If it has UTMs, also seed the `axis_*_utm_*` fields like `loadHDFCIRSample`.)
 
-### Step 5 — Wire keyboard shortcuts in §5
+### Step 5 - Wire keyboard shortcuts in §5
 Add an `else if` branch for the new tab in **both** the Generate and Copy
 routers:
 ```js
@@ -274,15 +274,15 @@ routers:
   else generateAxis();
 }
 ```
-…and the mirror for copy with `copyToClipboard('axisOutput' / 'axis_mtfOutput')`.
+...and the mirror for copy with `copyToClipboard('axisOutput' / 'axis_mtfOutput')`.
 
-### Step 6 — Test (see §8) and sync files (§7).
+### Step 6 - Test (see §8) and sync files (§7).
 
 ---
 
 ## 7. Build / sync / run
 
-There is **no build step** — it's static HTML.
+There is **no build step** - it's static HTML.
 
 **Sync the two copies after every edit** (edit `Deeplinks.html`, then):
 ```bash
@@ -345,12 +345,12 @@ vercel deploy --prod --yes
 ```
 Deeplinks/
 ├── index.html            # Served at root by Vercel (DUPLICATE of Deeplinks.html)
-├── Deeplinks.html        # Canonical working copy — edit here, then copy to index.html
+├── Deeplinks.html        # Canonical working copy - edit here, then copy to index.html
 ├── README.md             # This file
 ├── package.json          # Metadata + local `dev` server script
 ├── vercel.json           # Vercel config (cleanUrls)
 ├── hdfc_utm_link_builder.html   # Original reference for the HDFC extra_param JSON logic
-├── SBI Deeplinks.html           # Legacy standalone (pre-merge) — kept for history
+├── SBI Deeplinks.html           # Legacy standalone (pre-merge) - kept for history
 └── Deeplinks for HDFC IR, IRMTF, Sky.html  # Legacy standalone (pre-merge)
 ```
 The three legacy/reference HTMLs are **not** part of the app; they document how
